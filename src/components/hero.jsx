@@ -1,42 +1,108 @@
-export default function Hero() {
+import { FaArrowRight } from "react-icons/fa";
+
+const heroPosters = [
+  {
+    eyebrow: "Veritas",
+    title: "Light Into Focus",
+    subtitle: "Curated talks and workshops",
+    style: {
+      background:
+        "linear-gradient(160deg, rgba(19,57,92,1) 0%, rgba(44,106,159,1) 45%, rgba(244,188,84,1) 100%)",
+    },
+  },
+  {
+    eyebrow: "Celestial Odyssey",
+    title: "Night Of Ideas",
+    subtitle: "Immersive community showcase",
+    style: {
+      background:
+        "linear-gradient(160deg, rgba(16,22,74,1) 0%, rgba(61,43,159,1) 50%, rgba(104,195,255,1) 100%)",
+    },
+  },
+];
+
+export default function Hero({
+  totalEvents = 0,
+  categoriesCount = 0,
+  registeredPreview = 0,
+}) {
   return (
-    <section className="bg-[#14313F] text-white px-6 md:px-16 py-16 flex flex-col md:flex-row items-center justify-between gap-10">
-      <div className="md:w-1/2">
-        <span className="bg-[#E85D4E] px-5 py-2 rounded-full text-sm">
-          Nền tảng sự kiện cộng đồng
-        </span>
+    <section className="bg-[#173846] pb-24 text-white">
+      <div className="mx-auto grid max-w-6xl gap-12 px-4 pt-6 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
+        <div className="max-w-2xl">
+          <span className="inline-flex rounded-full bg-[#f06f58] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">
+            Nền tảng sự kiện cộng đồng
+          </span>
 
-        <h1 className="text-5xl font-bold mt-6 leading-tight">
-          Khám phá sự kiện <br /> Xung quanh bạn
-        </h1>
+          <h1 className="mt-6 text-4xl font-bold leading-tight sm:text-5xl">
+            Khám phá sự kiện
+            <br />
+            xung quanh bạn
+          </h1>
 
-        <p className="mt-6 text-gray-300 leading-7">
-          Từ âm nhạc, workshop đến hoạt động cộng đồng hấp dẫn diễn ra mỗi ngày.
-        </p>
+          <p className="mt-5 max-w-xl text-base leading-7 text-white/72 sm:text-lg">
+            Từ âm nhạc, workshop đến hoạt động cộng đồng, mọi trải nghiệm nổi bật
+            đều được gom lại để bạn dễ chọn và dễ tham gia.
+          </p>
 
-        <button className="mt-8 bg-[#E85D4E] px-8 py-3 rounded-xl hover:scale-105 duration-300 font-bold shadow-lg">
-          Khám phá ngay
-        </button>
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <button className="inline-flex items-center gap-2 rounded-2xl bg-[#e96a52] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#e96a52]/25 transition hover:bg-[#d75c46]">
+              Khám phá ngay
+              <FaArrowRight className="text-xs" />
+            </button>
 
-        <div className="flex gap-10 mt-12">
-          <div>
-            <h2 className="text-3xl font-bold">120</h2>
-            <p className="text-gray-300">Sự kiện đang mở</p>
+            <p className="text-sm text-white/60">
+              {totalEvents} sự kiện đang mở đăng ký
+            </p>
           </div>
-          <div>
-            <h2 className="text-3xl font-bold">500</h2>
-            <p className="text-gray-300">Người đăng ký</p>
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold">25</h2>
-            <p className="text-gray-300">Danh mục</p>
+
+          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
+              <p className="text-3xl font-bold text-white">{totalEvents}</p>
+              <p className="mt-2 text-sm text-white/60">Sự kiện phù hợp</p>
+            </div>
+
+            <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
+              <p className="text-3xl font-bold text-white">{registeredPreview}</p>
+              <p className="mt-2 text-sm text-white/60">Lượt đăng ký nổi bật</p>
+            </div>
+
+            <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
+              <p className="text-3xl font-bold text-white">{categoriesCount}</p>
+              <p className="mt-2 text-sm text-white/60">Danh mục đang có</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="flex gap-5">
-        <img className="w-50 h-72 rounded-3xl shadow-2xl object-cover" src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f" alt="event1" />
-        <img className="w-50 h-72 rounded-3xl shadow-2xl object-cover mt-10" src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a" alt="event2" />
+        <div className="flex items-center justify-center gap-4 lg:justify-end">
+          {heroPosters.map((poster, index) => (
+            <article
+              key={poster.title}
+              style={poster.style}
+              className={`relative flex min-h-[300px] w-[170px] flex-col justify-between overflow-hidden rounded-[28px] p-5 text-white shadow-2xl shadow-black/20 sm:w-[210px] ${
+                index === 0 ? "translate-y-10" : ""
+              }`}
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.28),_transparent_45%)]" />
+
+              <div className="relative">
+                <p className="text-2xl font-semibold italic leading-none">
+                  {poster.eyebrow}
+                </p>
+              </div>
+
+              <div className="relative">
+                <p className="text-xs uppercase tracking-[0.3em] text-white/70">
+                  Feature highlight
+                </p>
+                <h2 className="mt-3 text-3xl font-bold leading-tight">
+                  {poster.title}
+                </h2>
+                <p className="mt-3 text-sm text-white/75">{poster.subtitle}</p>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );

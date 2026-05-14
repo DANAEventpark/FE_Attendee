@@ -1,39 +1,41 @@
 import logo from "../assets/logoevent.png";
+
 export default function Navbar() {
   return (
-    <nav className="bg-[#14313F] text-white px-6 md:px-16 py-5 flex justify-between items-center">
-      <h1 className="text-2xl font-bold">
-        <img
-          src={logo}
-          alt="DANAEventSpark Logo"
-          className="inline-block w-8 h-8 mr-2"
-        />
-        DANAEventSpark
-      </h1>
+    <header className="border-b border-white/10 bg-[#173846] text-white">
+      <nav className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3">
+          <div className="rounded-2xl bg-white px-2 py-1 shadow-lg">
+            <img
+              src={logo}
+              alt="DANAEventSpark"
+              className="h-8 w-8 object-contain"
+            />
+          </div>
 
-      <ul className="hidden md:flex gap-10">
-        <li className="cursor-pointer hover:text-orange-300">
-          Sự kiện
-        </li>
+          <div>
+            <p className="text-base font-semibold leading-none">DANAEventSpark</p>
+            <p className="mt-1 text-xs text-white/60">
+              Khám phá sự kiện trong cộng đồng
+            </p>
+          </div>
+        </div>
 
-        <li className="cursor-pointer hover:text-orange-300">
-          Danh mục
-        </li>
+        <ul className="order-3 flex w-full flex-wrap items-center justify-center gap-6 text-sm font-medium text-white/80 md:order-none md:w-auto">
+          <li className="text-white">Sự kiện</li>
+          <li>Danh mục</li>
+          <li>Về chúng tôi</li>
+        </ul>
 
-        <li className="cursor-pointer hover:text-orange-300">
-          Về chúng tôi
-        </li>
-      </ul>
-
-      <div className="flex gap-3">
-        <button className="bg-white text-black px-4 py-2 rounded-xl">
-          Đăng nhập
-        </button>
-
-        <button className="bg-[#E85D4E] px-4 py-2 rounded-xl">
-          Đăng ký
-        </button>
-      </div>
-    </nav>
+        <div className="flex items-center gap-3">
+          <button className="rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-[#173846] transition hover:bg-[#f3ede5]">
+            Đăng nhập
+          </button>
+          <button className="rounded-2xl bg-[#e96a52] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#d75c46]">
+            Đăng ký
+          </button>
+        </div>
+      </nav>
+    </header>
   );
 }

@@ -1,23 +1,12 @@
 export default function Footer() {
   return (
-    <footer className="bg-[#14313F] text-white text-center py-14 mt-16">
-      <h2 className="text-3xl font-bold">
-        EventSpark
-      </h2>
-
-      <p className="text-gray-300 mt-4">
-        Nền tảng tổ chức và quản lý sự kiện hiện đại.
-      </p>
-
-      <div className="flex justify-center flex-wrap gap-10 mt-8">
-        <span>Khám phá</span>
-        <span>Danh mục</span>
-        <span>Về chúng tôi</span>
-        <span>Trung tâm trợ giúp</span>
-      </div>
-
-      <div className="border-t border-gray-500 mt-10 pt-6 text-gray-400">
-        © EventSpark 2025. All rights reserved.
+    <footer className="bg-[#173846] py-14 text-white">
+      <div className="mx-auto max-w-6xl px-4 text-center sm:px-6 lg:px-8">
+        <p className="text-2xl font-semibold text-[#f08469]">EventSpark</p>
+        <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-white/65 sm:text-base">
+          Nền tảng tổ chức và quản lý sự kiện hiện đại, kết nối đam mê tạo nên
+          những khoảnh khắc cộng đồng đáng nhớ.
+        </p>
       </div>
     </footer>
   );
