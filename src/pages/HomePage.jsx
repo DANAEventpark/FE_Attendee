@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 /**
  * HomePage — FE_Attendee
  * Placeholder cho trang chủ người tham dự
@@ -16,6 +18,14 @@ const HomePage = () => {
         <span className="inline-block mt-4 px-4 py-2 bg-teal-600 text-white rounded-full text-sm">
           FE_Attendee — dev
         </span>
+        <div className="mt-8">
+          <Link 
+            to="/login" 
+            className="px-6 py-3 bg-[#E53E3E] text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
+          >
+            Đăng nhập
+          </Link>
+        </div>
       </div>
     </div>
   )
