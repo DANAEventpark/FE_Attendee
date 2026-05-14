@@ -1,7 +1,13 @@
+import logo from "../assets/logoevent.png";
 export default function Navbar() {
   return (
     <nav className="bg-[#14313F] text-white px-6 md:px-16 py-5 flex justify-between items-center">
       <h1 className="text-2xl font-bold">
+        <img
+          src={logo}
+          alt="DANAEventSpark Logo"
+          className="inline-block w-8 h-8 mr-2"
+        />
         DANAEventSpark
       </h1>
 
