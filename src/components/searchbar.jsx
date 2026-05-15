@@ -1,26 +1,35 @@
-import { FaSearch, FaFilter } from "react-icons/fa";
+import { Search, Filter } from 'lucide-react';
 
-export default function SearchBar() {
+const SearchBar = () => {
   return (
-    <div className="px-6 md:px-16 -mt-10 relative z-10">
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
-        
-       
-        <div className="bg-white rounded-2xl shadow-lg flex items-center px-6 py-4 w-full max-w-3xl border border-gray-100">
-          <FaSearch className="text-gray-300 text-xl" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm sự kiện, địa điểm, ban tổ chức..."
-            className="w-full px-4 outline-none text-gray-600 placeholder-gray-300"
-          />
-        </div>
+    <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
 
-        <button className="bg-white rounded-2xl shadow-lg flex items-center gap-3 px-8 py-4 border border-gray-100 text-gray-400 hover:text-[#E85D4E] transition-all">
-          <FaFilter />
-          <span className="font-medium">Lọc và sắp xếp</span>
-        </button>
+      {/* SEARCH */}
+
+      <div className="w-full md:w-[720px] lg:w-[780px] bg-white rounded-2xl shadow-xl flex items-center px-6 py-4 border border-gray-100">
+
+        <Search className="text-gray-300 mr-4" size={22} />
+
+        <input
+          type="text"
+          placeholder="Tìm kiếm sự kiện, địa điểm..."
+          className="w-full outline-none text-gray-700 placeholder:text-gray-300"
+        />
 
       </div>
+
+      {/* FILTER */}
+
+      <button className="bg-white px-6 py-4 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-3 text-gray-500 font-bold hover:bg-gray-50 transition-all">
+
+        <Filter size={18} className="text-[#E76241]" />
+
+        Lọc
+
+      </button>
+
     </div>
   );
-}
+};
+
+export default SearchBar;

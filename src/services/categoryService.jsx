@@ -1,15 +1,17 @@
-import axios from "axios";
+import api from '@/services/api'
+import { resolveMediaUrl } from '@/services/media'
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000/api",
-});
-
-export const getCategories = async () => {
-  try {
-    const response = await api.get("/categories");
-    return response.data;
-  } catch (error) {
-    console.error("Loi lay categories:", error);
-    throw error;
+function normalizeCategory(category = {}) {
+  return {
+    ...category,
+    image_url: category.image_url ?? resolveMediaUrl(category.image),
   }
-};
+}
+
+export async function getCategories() {
+  const response = await api.get('/categories')
+  const payload = response.data
+  const categories = Array.isArray(payload) ? payload : payload?.data ?? []
+
+  return categories.map(normalizeCategory)
+}
