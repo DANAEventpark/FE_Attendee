@@ -22,14 +22,28 @@ export default function Navbar() {
         </div>
 
         <ul className="order-3 flex w-full flex-wrap items-center justify-center gap-6 text-sm font-medium text-white/80 md:order-none md:w-auto">
-          <li className="text-white">Sự kiện</li>
-          <li>Danh mục</li>
-          <li>Về chúng tôi</li>
+          <li>
+            <a href="#" className="text-white">
+              Sự kiện
+            </a>
+          </li>
+          <li>
+            <a href="#" className="text-white">
+              Danh mục
+            </a>
+          </li>
+          <li>
+            <a href="#" className="text-white">
+              Về chúng tôi
+            </a>
+          </li>
         </ul>
 
         <div className="flex items-center gap-3">
           <button className="rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-[#173846] transition hover:bg-[#f3ede5]">
-            Đăng nhập
+            <a href="#" className="text-[#173846]">
+              Đăng nhập
+            </a>
           </button>
           <button className="rounded-2xl bg-[#e96a52] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#d75c46]">
             Đăng ký
