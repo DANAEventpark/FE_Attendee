@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router-dom'
 import HomePage from '@/pages/HomePage'
+import EventDetailPage from '@/pages/EventDetailPage'
 
 /**
  * Router Configuration — FE_Attendee
@@ -14,7 +15,7 @@ const router = createBrowserRouter([
   // Các route sẽ được thêm theo từng REQ:
   // { path: '/login', element: <LoginPage /> },
   // { path: '/events', element: <EventListPage /> },
-  // { path: '/events/:id', element: <EventDetailPage /> },
+  { path: '/events/:id', element: <EventDetailPage /> },
   // { path: '/profile', element: <ProfilePage /> },
 ])
 
