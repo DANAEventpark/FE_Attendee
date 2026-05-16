@@ -23,17 +23,17 @@ export default function Navbar() {
 
         <ul className="order-3 flex w-full flex-wrap items-center justify-center gap-6 text-sm font-medium text-white/80 md:order-none md:w-auto">
           <li>
-            <a href="#" className="text-white">
+            <a href="/" className="text-white">
               Sự kiện
             </a>
           </li>
           <li>
-            <a href="#" className="text-white">
+            <a href="/categories" className="text-white">
               Danh mục
             </a>
           </li>
           <li>
-            <a href="#" className="text-white">
+            <a href="/about" className="text-white">
               Về chúng tôi
             </a>
           </li>
@@ -41,12 +41,12 @@ export default function Navbar() {
 
         <div className="flex items-center gap-3">
           <button className="rounded-2xl bg-white px-4 py-2 text-sm font-semibold text-[#173846] transition hover:bg-[#f3ede5]">
-            <a href="#" className="text-[#173846]">
+            <a href="/login" className="text-[#173846]">
               Đăng nhập
             </a>
           </button>
           <button className="rounded-2xl bg-[#e96a52] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#d75c46]">
-            Đăng ký
+            <a href="/register" className="text-white">Đăng ký</a>
           </button>
         </div>
       </nav>
