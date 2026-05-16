@@ -3,6 +3,9 @@ import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import CategoryPage from '@/pages/CategoryPage'
+import EventByCategoryPage from '@/pages/EventByCategoryPage'
+import AboutPage from '@/pages/AboutPage'
 
 // Dummy component
 const EventsPage = () => <div className="p-8 text-2xl font-bold">Attendee Events Page</div>;
@@ -25,7 +28,6 @@ const router = createBrowserRouter([
     path: '/register',
     element: <RegisterPage />,
   },
-
   {
     path: '/events',
     element: (
@@ -33,6 +35,18 @@ const router = createBrowserRouter([
         <EventsPage />
       </ProtectedRoute>
     )
+  },
+  {
+    path: '/categories',
+    element: <CategoryPage />,
+  },
+  {
+    path: '/categories/:id/events',
+    element: <EventByCategoryPage />
+  },
+  {
+    path: '/about',
+    element: <AboutPage />
   },
   {
     path: '*',
