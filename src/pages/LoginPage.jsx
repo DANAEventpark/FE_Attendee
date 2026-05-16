@@ -30,7 +30,8 @@ const LoginPage = () => {
       }
 
       login(user, token);
-      navigate('/events');
+      navigate('/');
+
     } catch (err) {
       setError(err.response?.data?.message || 'Có lỗi xảy ra khi đăng nhập.');
     } finally {

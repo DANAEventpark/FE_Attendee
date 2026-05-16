@@ -1,5 +1,5 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import HomePage from '@/pages/HomePage'
+import HomePage from '@/pages/homepage'
 import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
 import ProtectedRoute from '@/components/ProtectedRoute'
@@ -8,8 +8,6 @@ import EventByCategoryPage from '@/pages/EventByCategoryPage'
 import AboutPage from '@/pages/AboutPage'
 import EventDetailPage from '@/pages/EventDetailPage'
 
-// Dummy component
-const EventsPage = () => <div className="p-8 text-2xl font-bold">Attendee Events Page</div>;
 
 /**
  * Router Configuration — FE_Attendee
@@ -28,14 +26,6 @@ const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
-  },
-  {
-    path: '/events',
-    element: (
-      <ProtectedRoute role="attendee">
-        <EventsPage />
-      </ProtectedRoute>
-    )
   },
   {
     path: '/events/:id',
