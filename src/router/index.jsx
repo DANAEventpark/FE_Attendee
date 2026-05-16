@@ -6,6 +6,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import CategoryPage from '@/pages/CategoryPage'
 import EventByCategoryPage from '@/pages/EventByCategoryPage'
 import AboutPage from '@/pages/AboutPage'
+import EventDetailPage from '@/pages/EventDetailPage'
 
 // Dummy component
 const EventsPage = () => <div className="p-8 text-2xl font-bold">Attendee Events Page</div>;
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
         <EventsPage />
       </ProtectedRoute>
     )
+  },
+  {
+    path: '/events/:id',
+    element: <EventDetailPage />
   },
   {
     path: '/categories',
