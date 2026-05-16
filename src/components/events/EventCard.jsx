@@ -3,13 +3,10 @@ import {
   FaMapMarkerAlt,
   FaStar,
   FaTag,
-  FaUsers,
   FaClock,
 } from 'react-icons/fa'
 
 import heroFallback from '@/assets/hero.png'
-
-const STORAGE_BASE_URL = 'http://127.0.0.1:8000/storage/'
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('vi-VN', {
   day: '2-digit',
@@ -20,7 +17,6 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('vi-VN', {
 })
 
 function formatDate(dateValue) {
-
   if (!dateValue) {
     return 'Đang cập nhật'
   }
@@ -35,7 +31,6 @@ function formatDate(dateValue) {
 }
 
 function formatDateRange(startTime, endTime) {
-
   if (!startTime) {
     return 'Đang cập nhật lịch trình'
   }
@@ -60,7 +55,6 @@ function formatDateRange(startTime, endTime) {
 }
 
 function shortDescription(description) {
-
   if (!description) {
     return 'Thông tin sự kiện đang được cập nhật.'
   }
@@ -74,32 +68,37 @@ function shortDescription(description) {
 
 export default function EventCard({ event }) {
 
-  // IMAGE
+  /**
+   * IMAGE
+   * Backend Laravel đã trả image_url đầy đủ
+   */
+  const displayImage =
+    event.category?.image_url || heroFallback
 
-  const displayImage = event.category?.image
-    ? `${STORAGE_BASE_URL}${event.category.image}`
-    : heroFallback
-
-  // CATEGORY
-
+  /**
+   * CATEGORY
+   */
   const categoryName =
     event.category?.name ?? 'Sự kiện'
 
-  // ORGANIZER
-
+  /**
+   * ORGANIZER
+   */
   const organizerName =
     event.organizer?.organization_name ??
     event.organizer?.name ??
     'Ban tổ chức'
 
-  // RATING
-
+  /**
+   * RATING
+   */
   const rating = Number(
     event.reviews_avg_rating ?? 0
   )
 
-  // SLOT
-
+  /**
+   * SLOT
+   */
   const totalSlots = event.capacity ?? 0
 
   const registeredCount =
@@ -114,7 +113,6 @@ export default function EventCard({ event }) {
     <article className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.14)]">
 
       {/* IMAGE */}
-
       <div className="relative h-56 overflow-hidden bg-slate-200">
 
         <img
@@ -131,6 +129,7 @@ export default function EventCard({ event }) {
 
         <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
 
+          {/* CATEGORY */}
           <span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900 backdrop-blur">
 
             <FaTag className="mr-2 text-[#e96a52]" />
@@ -139,6 +138,7 @@ export default function EventCard({ event }) {
 
           </span>
 
+          {/* REGISTER COUNT */}
           <span className="inline-flex rounded-full bg-slate-950/60 px-3 py-1 text-xs font-medium text-white backdrop-blur">
 
             {registeredCount} đăng ký
@@ -149,11 +149,9 @@ export default function EventCard({ event }) {
       </div>
 
       {/* CONTENT */}
-
       <div className="space-y-4 p-5">
 
         {/* TITLE */}
-
         <div>
 
           <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#e96a52]">
@@ -177,11 +175,9 @@ export default function EventCard({ event }) {
         </div>
 
         {/* INFO */}
-
         <div className="space-y-3 text-sm text-slate-600">
 
           {/* EVENT TIME */}
-
           <div className="flex items-start gap-3">
 
             <FaCalendarAlt className="mt-0.5 text-[#e96a52]" />
@@ -196,7 +192,6 @@ export default function EventCard({ event }) {
           </div>
 
           {/* LOCATION */}
-
           <div className="flex items-start gap-3">
 
             <FaMapMarkerAlt className="mt-0.5 text-[#e96a52]" />
@@ -209,7 +204,6 @@ export default function EventCard({ event }) {
           </div>
 
           {/* DEADLINE */}
-
           <div className="flex items-start gap-3">
 
             <FaClock className="mt-0.5 text-[#e96a52]" />
@@ -228,11 +222,9 @@ export default function EventCard({ event }) {
         </div>
 
         {/* FOOTER */}
-
         <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
 
           {/* REGISTERED */}
-
           <div className="rounded-2xl bg-slate-50 p-3">
 
             <p className="text-xs font-medium text-slate-500">
@@ -246,7 +238,6 @@ export default function EventCard({ event }) {
           </div>
 
           {/* SLOT */}
-
           <div className="rounded-2xl bg-slate-50 p-3">
 
             <p className="text-xs font-medium text-slate-500">
@@ -264,7 +255,6 @@ export default function EventCard({ event }) {
         </div>
 
         {/* RATING */}
-
         <div className="flex items-center justify-end gap-2 text-sm font-medium text-slate-700">
 
           <FaStar className="text-amber-400" />
