@@ -1,5 +1,11 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import HomePage from '@/pages/HomePage'
+import LoginPage from '@/pages/LoginPage'
+import RegisterPage from '@/pages/RegisterPage'
+import ProtectedRoute from '@/components/ProtectedRoute'
+
+// Dummy component
+const EventsPage = () => <div className="p-8 text-2xl font-bold">Attendee Events Page</div>;
 
 /**
  * Router Configuration — FE_Attendee
@@ -11,11 +17,27 @@ const router = createBrowserRouter([
     path: '/',
     element: <HomePage />,
   },
-  // Các route sẽ được thêm theo từng REQ:
-  // { path: '/login', element: <LoginPage /> },
-  // { path: '/events', element: <EventListPage /> },
-  // { path: '/events/:id', element: <EventDetailPage /> },
-  // { path: '/profile', element: <ProfilePage /> },
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
+  },
+
+  {
+    path: '/events',
+    element: (
+      <ProtectedRoute role="attendee">
+        <EventsPage />
+      </ProtectedRoute>
+    )
+  },
+  {
+    path: '*',
+    element: <Navigate to="/" replace />
+  }
 ])
 
 export default router
