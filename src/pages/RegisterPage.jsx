@@ -76,21 +76,22 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-xl flex flex-col md:flex-row overflow-hidden max-w-5xl w-full min-h-[600px]">
-        {/* CỘT TRÁI (55% width) */}
-        <div className="w-full md:w-[55%] p-10 flex flex-col">
+    <div className="flex flex-col lg:flex-row min-h-screen w-full">
+      {/* LEFT COLUMN - FORM (55% on desktop) */}
+      <div className="w-full lg:w-[55%] flex-1 flex flex-col justify-center px-6 py-10 sm:px-16 lg:px-24 bg-white order-2 lg:order-1">
+        <div className="max-w-md w-full mx-auto">
           {/* Logo */}
           <div className="mb-8">
             <span className="text-[#2E6E7E] font-semibold text-xl">Event</span>
             <span className="text-[#C0442B] font-semibold text-xl">Spark</span>
           </div>
 
-
           <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Tạo tài khoản</h1>
-            <p className="text-sm text-gray-600 mt-1">Đăng ký với tư cách người tham gia</p>
-            <p className="text-xs text-gray-400">Tham gia cộng đồng EventSpark ngay hôm nay</p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Tạo tài khoản</h1>
+            <p className="text-sm text-gray-600 mt-2">
+              Đăng ký với tư cách <span className="text-[#2E6E7E] font-medium">Người tham gia</span>
+            </p>
+            <p className="text-xs text-gray-400 mt-1">Tham gia cộng đồng EventSpark ngay hôm nay</p>
           </div>
 
           {apiError && (
@@ -108,15 +109,15 @@ const RegisterPage = () => {
           <form onSubmit={handleSubmit} className="space-y-5 mt-6">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
               <input
                 name="email"
                 type="email"
                 placeholder="ten@gmail.com"
                 value={form.email}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none transition-all ${
-                  errors.email ? 'border-red-500' : 'border-gray-200'
+                className={`w-full px-4 py-3 border rounded-xl bg-gray-50/50 focus:ring-2 focus:ring-[#2E6E7E] focus:border-transparent outline-none transition-all ${
+                  errors.email ? 'border-red-500' : 'border-gray-100'
                 }`}
               />
               {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
@@ -124,15 +125,15 @@ const RegisterPage = () => {
 
             {/* Họ và Tên Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Họ và Tên</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Họ và Tên</label>
               <input
                 name="name"
                 type="text"
                 placeholder="Nguyễn Văn A"
                 value={form.name}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none transition-all ${
-                  errors.name ? 'border-red-500' : 'border-gray-200'
+                className={`w-full px-4 py-3 border rounded-xl bg-gray-50/50 focus:ring-2 focus:ring-[#2E6E7E] focus:border-transparent outline-none transition-all ${
+                  errors.name ? 'border-red-500' : 'border-gray-100'
                 }`}
               />
               {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
@@ -140,7 +141,7 @@ const RegisterPage = () => {
 
             {/* Mật khẩu Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Mật khẩu</label>
               <div className="relative">
                 <input
                   name="password"
@@ -148,14 +149,14 @@ const RegisterPage = () => {
                   placeholder="••••••••"
                   value={form.password}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-teal-500 outline-none transition-all ${
-                    errors.password ? 'border-red-500' : 'border-gray-200'
+                  className={`w-full px-4 py-3 border rounded-xl bg-gray-50/50 focus:ring-2 focus:ring-[#2E6E7E] focus:border-transparent outline-none transition-all ${
+                    errors.password ? 'border-red-500' : 'border-gray-100'
                   }`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#C0442B]"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -166,7 +167,7 @@ const RegisterPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 rounded-lg mt-6 transition-colors disabled:opacity-70 flex items-center justify-center"
+              className="w-full bg-[#C0442B] hover:bg-red-700 text-white font-medium py-3 rounded-xl mt-6 transition-all disabled:opacity-70 flex items-center justify-center shadow-lg shadow-red-500/20"
             >
               {loading ? (
                 <>
@@ -183,21 +184,52 @@ const RegisterPage = () => {
           </form>
 
           <div className="mt-8 text-center text-sm">
-            <span className="text-gray-600">Bạn đã có tài khoản? </span>
+            <span className="text-gray-500">Bạn đã có tài khoản? </span>
             <Link to="/login" className="text-blue-500 font-medium hover:underline">
               Đăng nhập ngay
             </Link>
           </div>
         </div>
+      </div>
 
-        {/* CỘT PHẢI (45% width) */}
-        <div className="hidden md:block w-[45%] relative">
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: "url('/src/assets/bg-register.jpg')" }}
-          />
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/15" />
+      {/* RIGHT COLUMN - IMAGE (45% on desktop) */}
+      <div className="w-full h-[45vh] lg:h-auto lg:w-[45%] relative flex flex-col p-6 lg:p-12 order-1 lg:order-2 shrink-0">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/src/assets/bg-register.jpg')" }}
+        />
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/30" />
+
+        {/* Overlay Content */}
+        <div className="relative z-10 flex flex-col h-full">
+          {/* Logo on image (mobile mostly) */}
+          <div className="flex lg:hidden items-center gap-2 mb-4">
+            <h1 className="text-2xl font-bold text-white">
+              DANA<span className="text-[#FFC107]">EventSpark</span>
+            </h1>
+          </div>
+
+          <div className="mt-auto pb-4 lg:pb-12">
+            <h2 className="text-2xl lg:text-4xl font-bold text-white mb-3 leading-tight">
+              Sự kiện kết nối cộng đồng Đà Nẵng
+            </h2>
+            <p className="text-sm lg:text-base text-gray-200 mb-6 max-w-md">
+              Khám phá hàng trăm sự kiện thú vị tham gia và trải nghiệm ngay hôm nay
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
+                Sự kiện đa dạng
+              </span>
+              <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
+                Đặt vé dễ dàng
+              </span>
+              <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
+                Hoàn toàn miễn phí
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
