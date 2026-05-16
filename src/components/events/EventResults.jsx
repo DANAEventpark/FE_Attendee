@@ -12,9 +12,6 @@ export default function EventResults({
   onPageChange,
 }) {
 
-  /**
-   * ERROR
-   */
   if (error) {
     return (
       <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700">
@@ -23,9 +20,6 @@ export default function EventResults({
     )
   }
 
-  /**
-   * LOADING
-   */
   if (loading) {
     return (
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -40,16 +34,11 @@ export default function EventResults({
     )
   }
 
-  /**
-   * EMPTY
-   */
   if (events.length === 0) {
     return <EventEmpty />
   }
 
-  /**
-   * SUCCESS
-   */
+
   return (
     <>
       <EventGrid events={events} />

@@ -68,10 +68,7 @@ function shortDescription(description) {
 
 export default function EventCard({ event }) {
 
-  /**
-   * IMAGE
-   * Backend Laravel đã trả image_url đầy đủ
-   */
+  
   const displayImage =
     event.category?.image_url || heroFallback
 

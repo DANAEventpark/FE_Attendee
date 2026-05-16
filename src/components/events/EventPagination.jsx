@@ -10,7 +10,6 @@ export default function EventPagination({
   return (
     <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
 
-      {/* PREV */}
       <button
         type="button"
         onClick={() => onPageChange(page - 1)}
@@ -20,7 +19,6 @@ export default function EventPagination({
         Prev
       </button>
 
-      {/* PAGE LIST */}
       {Array.from(
         { length: lastPage },
         (_, index) => {
@@ -43,7 +41,6 @@ export default function EventPagination({
         }
       )}
 
-      {/* NEXT */}
       <button
         type="button"
         onClick={() => onPageChange(page + 1)}
