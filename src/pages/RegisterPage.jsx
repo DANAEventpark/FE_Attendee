@@ -77,8 +77,10 @@ const RegisterPage = () => {
 
   return (
     <div className="flex flex-col lg:flex-row min-h-screen w-full">
-      {/* LEFT COLUMN - FORM (55% on desktop) */}
-      <div className="w-full lg:w-[55%] flex-1 flex flex-col justify-center px-6 py-10 sm:px-16 lg:px-24 bg-white order-2 lg:order-1">
+      {/* LEFT COLUMN - FORM (30% on desktop) */}
+      <div className="w-full lg:w-[30%] flex flex-col justify-center px-6 py-10 sm:px-12 lg:px-16 bg-white order-2 lg:order-1">
+
+
         <div className="max-w-md w-full mx-auto">
           {/* Logo */}
           <div className="mb-8">
@@ -192,8 +194,10 @@ const RegisterPage = () => {
         </div>
       </div>
 
-      {/* RIGHT COLUMN - IMAGE (45% on desktop) */}
-      <div className="w-full h-[45vh] lg:h-auto lg:w-[45%] relative flex flex-col p-6 lg:p-12 order-1 lg:order-2 shrink-0">
+      {/* RIGHT COLUMN - IMAGE (70% on desktop) */}
+      <div className="w-full h-[45vh] lg:h-auto lg:w-[70%] relative flex flex-col p-6 lg:p-12 order-1 lg:order-2 shrink-0">
+
+
         {/* Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
