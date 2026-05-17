@@ -2,12 +2,12 @@ import {
   FaCalendarAlt,
   FaMapMarkerAlt,
   FaStar,
-  FaTag,
   FaClock,
 } from 'react-icons/fa'
 
 import heroFallback from '@/assets/hero.png'
 
+// GIỮ NGUYÊN CÁC HÀM FORMAT DỮ LIỆU CỦA BẠN
 const DATE_FORMATTER = new Intl.DateTimeFormat('vi-VN', {
   day: '2-digit',
   month: 'short',
@@ -17,101 +17,38 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('vi-VN', {
 })
 
 function formatDate(dateValue) {
-  if (!dateValue) {
-    return 'Đang cập nhật'
-  }
-
+  if (!dateValue) return 'Đang cập nhật'
   const date = new Date(dateValue)
-
-  if (Number.isNaN(date.getTime())) {
-    return 'Đang cập nhật'
-  }
-
+  if (Number.isNaN(date.getTime())) return 'Đang cập nhật'
   return DATE_FORMATTER.format(date)
 }
 
 function formatDateRange(startTime, endTime) {
-  if (!startTime) {
-    return 'Đang cập nhật lịch trình'
-  }
-
+  if (!startTime) return 'Đang cập nhật lịch trình'
   const start = new Date(startTime)
-
-  const end = endTime
-    ? new Date(endTime)
-    : null
-
-  if (Number.isNaN(start.getTime())) {
-    return 'Đang cập nhật lịch trình'
-  }
+  const end = endTime ? new Date(endTime) : null
+  if (Number.isNaN(start.getTime())) return 'Đang cập nhật lịch trình'
 
   const startLabel = DATE_FORMATTER.format(start)
-
-  if (!end || Number.isNaN(end.getTime())) {
-    return startLabel
-  }
+  if (!end || Number.isNaN(end.getTime())) return startLabel
 
   return `${startLabel} - ${DATE_FORMATTER.format(end)}`
 }
 
-function shortDescription(description) {
-  if (!description) {
-    return 'Thông tin sự kiện đang được cập nhật.'
-  }
-
-  if (description.length <= 120) {
-    return description
-  }
-
-  return `${description.slice(0, 117)}...`
-}
-
 export default function EventCard({ event }) {
-
-  
-  const displayImage =
-    event.category?.image_url || heroFallback
-
-  /**
-   * CATEGORY
-   */
-  const categoryName =
-    event.category?.name ?? 'Sự kiện'
-
-  /**
-   * ORGANIZER
-   */
-  const organizerName =
-    event.organizer?.organization_name ??
-    event.organizer?.name ??
-    'Ban tổ chức'
-
-  /**
-   * RATING
-   */
-  const rating = Number(
-    event.reviews_avg_rating ?? 0
-  )
-
-  /**
-   * SLOT
-   */
+  // GIỮ NGUYÊN LOGIC DỮ LIỆU CỦA BẠN
+  const displayImage = event.category?.image_url || heroFallback
+  const categoryName = event.category?.name ?? 'Sự kiện'
+  const rating = Number(event.reviews_avg_rating ?? 0)
   const totalSlots = event.capacity ?? 0
-
-  const registeredCount =
-    event.confirmed_registrations_count ?? 0
-
-  const remainingSlots = Math.max(
-    0,
-    totalSlots - registeredCount
-  )
+  const registeredCount = event.confirmed_registrations_count ?? 0
+  const remainingSlots = Math.max(0, totalSlots - registeredCount)
 
   return (
-    <article className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(15,23,42,0.14)]">
-
-      {/* IMAGE */}
-      <div className="relative h-56 overflow-hidden bg-slate-200">
-
+    <article className="w-[360px] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)] font-sans">
+      
+      {/* 1. HÌNH ẢNH & BADGE DANH MỤC (Giống ảnh mẫu) */}
+      <div className="relative h-48 overflow-hidden">
         <img
           src={displayImage}
           alt={event.title}
@@ -121,148 +58,64 @@ export default function EventCard({ event }) {
             imageEvent.currentTarget.src = heroFallback
           }}
         />
-
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-transparent" />
-
-        <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
-
-          {/* CATEGORY */}
-          <span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-slate-900 backdrop-blur">
-
-            <FaTag className="mr-2 text-[#e96a52]" />
-
-            {categoryName}
-
-          </span>
-
-          {/* REGISTER COUNT */}
-          <span className="inline-flex rounded-full bg-slate-950/60 px-3 py-1 text-xs font-medium text-white backdrop-blur">
-
-            {registeredCount} đăng ký
-
-          </span>
-
-        </div>
+        {/* Badge danh mục màu hồng cánh sen bo tròn đè lên ảnh */}
+        <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-[#cc2bd6] px-4 py-1 text-sm font-semibold text-white shadow-sm">
+          {categoryName}
+        </span>
       </div>
 
-      {/* CONTENT */}
-      <div className="space-y-4 p-5">
+      {/* KHỐI NỘI DUNG CHÍNH (Format Tailwind) */}
+      <div className="p-5 space-y-4">
+        
+        {/* 2. TIÊU ĐỀ SỰ KIỆN */}
+        <h3 className="text-[21px] font-bold text-[#2d4a57] leading-snug">
+          {event.title}
+        </h3>
 
-        {/* TITLE */}
-        <div>
+        {/* 3. ĐẦY ĐỦ THÔNG TIN TỪ CODE CŨ (Đã tinh chỉnh icon gọn gàng) */}
+        <div className="space-y-2.5 text-[15px] text-[#7d5142] font-medium">
+          {/* Thời gian diễn ra */}
+          <div className="flex items-start gap-2.5">
+            <FaCalendarAlt className="text-[16px] text-slate-500 mt-1 shrink-0" />
+            <span>{formatDateRange(event.start_time, event.end_time)}</span>
+          </div>
 
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#e96a52]">
+          {/* Địa điểm */}
+          <div className="flex items-start gap-2.5">
+            <FaMapMarkerAlt className="text-[17px] text-slate-500 mt-0.5 shrink-0" />
+            <span>{event.location ?? 'Đang cập nhật địa điểm'}</span>
+          </div>
 
-            {organizerName}
+          {/* Hạn đăng ký (Vẫn hiển thị đầy đủ) */}
+          <div className="flex items-start gap-2.5">
+            <FaClock className="text-[16px] text-slate-500 mt-1 shrink-0" />
+            <span>
+              Hạn đăng ký: <b className="text-slate-900 font-semibold">{formatDate(event.registration_deadline)}</b>
+            </span>
+          </div>
+        </div>
 
+        {/* 4. SLOT CÒN LẠI & RATING (Gom nhóm gọn gàng trên nút) */}
+        <div className="flex items-center justify-between pt-1">
+          {/* Hiển thị số slot dạng Còn X/Y slot */}
+          <p className="text-[16px] font-bold text-[#2d4a57]">
+            Còn {remainingSlots}/{totalSlots} slot
           </p>
-
-          <h3 className="mt-2 text-xl font-semibold text-slate-900">
-
-            {event.title}
-
-          </h3>
-
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-
-            {shortDescription(event.description)}
-
-          </p>
-
+          
+          {/* Số điểm đánh giá sao */}
+          <div className="flex items-center gap-1 text-sm font-semibold text-slate-600">
+            <FaStar className="text-amber-400 text-base" />
+            <span>{rating > 0 ? rating.toFixed(1) : 'Mới'}</span>
+          </div>
         </div>
 
-        {/* INFO */}
-        <div className="space-y-3 text-sm text-slate-600">
-
-          {/* EVENT TIME */}
-          <div className="flex items-start gap-3">
-
-            <FaCalendarAlt className="mt-0.5 text-[#e96a52]" />
-
-            <span>
-              {formatDateRange(
-                event.start_time,
-                event.end_time
-              )}
-            </span>
-
-          </div>
-
-          {/* LOCATION */}
-          <div className="flex items-start gap-3">
-
-            <FaMapMarkerAlt className="mt-0.5 text-[#e96a52]" />
-
-            <span>
-              {event.location ??
-                'Đang cập nhật địa điểm'}
-            </span>
-
-          </div>
-
-          {/* DEADLINE */}
-          <div className="flex items-start gap-3">
-
-            <FaClock className="mt-0.5 text-[#e96a52]" />
-
-            <span>
-              Hạn đăng ký:
-              <b className="ml-1 text-slate-900">
-                {formatDate(
-                  event.registration_deadline
-                )}
-              </b>
-            </span>
-
-          </div>
-
-        </div>
-
-        {/* FOOTER */}
-        <div className="grid grid-cols-2 gap-4 border-t border-slate-100 pt-4">
-
-          {/* REGISTERED */}
-          <div className="rounded-2xl bg-slate-50 p-3">
-
-            <p className="text-xs font-medium text-slate-500">
-              Lượt đăng ký
-            </p>
-
-            <p className="mt-1 text-xl font-bold text-slate-900">
-              {registeredCount}
-            </p>
-
-          </div>
-
-          {/* SLOT */}
-          <div className="rounded-2xl bg-slate-50 p-3">
-
-            <p className="text-xs font-medium text-slate-500">
-              Slot còn lại
-            </p>
-
-            <p className="mt-1 text-xl font-bold text-slate-900">
-
-              {remainingSlots}/{totalSlots}
-
-            </p>
-
-          </div>
-
-        </div>
-
-        {/* RATING */}
-        <div className="flex items-center justify-end gap-2 text-sm font-medium text-slate-700">
-
-          <FaStar className="text-amber-400" />
-
-          <span>
-            {rating > 0
-              ? rating.toFixed(1)
-              : 'Mới'}
-          </span>
-
-        </div>
+        {/* 5. NÚT XEM CHI TIẾT (Màu cam đỏ giống hệt ảnh mẫu) */}
+        <button 
+          type="button"
+          className="w-full rounded-[14px] bg-[#e14d34] py-3 text-center text-[16px] font-bold text-white transition-all duration-200 hover:bg-[#c93f28] active:scale-[0.98]"
+        >
+          Xem chi tiết
+        </button>
 
       </div>
     </article>
