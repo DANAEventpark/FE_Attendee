@@ -21,7 +21,7 @@ export default function HomePage() {
   const [activeCategoryId, setActiveCategoryId] = useState('all')
   const [timeFilter, setTimeFilter] = useState('upcoming')
 
-  // KHAI BÁO STATE LƯU SỐ THỐNG KÊ CỨNG TOÀN HỆ THỐNG
+  // State for dynamic system stats
   const [stats, setStats] = useState({
     totalEvents: 0,
     totalRegistrations: 0,
@@ -87,9 +87,9 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#f4efe7] text-slate-900">
+
       <Navbar />
 
-      {/* TRUYỀN CÁC SỐ THỐNG KÊ CỨNG LẤY TỪ DATABASE VÀO ĐÂY */}
       <Hero
         totalEvents={stats.totalEvents}
         totalRegistrations={stats.totalRegistrations}
@@ -110,8 +110,11 @@ export default function HomePage() {
       />
 
       <main className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+
           <div>
+
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#e96a52]">
               Event feed
             </p>
@@ -130,8 +133,11 @@ export default function HomePage() {
           </div>
 
           <div className="rounded-2xl bg-white px-5 py-4 text-sm text-slate-500 shadow-sm">
+
             Trang {pagination.currentPage} / {pagination.lastPage}
+
           </div>
+
         </div>
 
         <EventResults
@@ -142,9 +148,11 @@ export default function HomePage() {
           page={page}
           onPageChange={handlePageChange}
         />
+
       </main>
 
       <Footer />
+
     </div>
   )
 }

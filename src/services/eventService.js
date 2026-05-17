@@ -1,7 +1,9 @@
-import api from './api'
+import client from '@/api/client'
+
 
 export const getEvents = async (page = 1, search = '', categoryId = 'all', timeFilter = 'upcoming') => {
-  const response = await api.get('/events', {
+  const response = await client.get('/events', {
+
     params: {
       page: page,
       search: search,
@@ -13,6 +15,6 @@ export const getEvents = async (page = 1, search = '', categoryId = 'all', timeF
 }
 
 export const getSystemStats = async () => {
-  const response = await api.get('/system-stats') 
+  const response = await client.get('/system-stats') 
   return response.data
 }

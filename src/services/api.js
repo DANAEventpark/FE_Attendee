@@ -1,15 +1,6 @@
 import axios from 'axios'
-import useAuthStore from '@/stores/useAuthStore'
+import { useAuthStore } from '../store/authStore'
 
-/**
- * Axios Instance — FE_Attendee
- * Cấu hình HTTP client gọi đến Laravel API (BE_DANAEventpark)
- *
- * Features:
- *  - baseURL trỏ đến BE Laravel port 8000
- *  - Request interceptor: tự động gắn JWT token vào header
- *  - Response interceptor: tự động logout khi nhận lỗi 401
- */
 const api = axios.create({
   baseURL: 'http://localhost:8000/api',
   timeout: 10000,
@@ -19,29 +10,34 @@ const api = axios.create({
   },
 })
 
-// ─── Request Interceptor ───────────────────────────────────────────────────
-// Tự động đính kèm JWT token vào mỗi request
+// REQUEST INTERCEPTOR
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().token
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+
     return config
   },
   (error) => Promise.reject(error)
 )
 
-// ─── Response Interceptor ──────────────────────────────────────────────────
-// Xử lý lỗi toàn cục: 401 → tự động logout
+// RESPONSE INTERCEPTOR
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+
     if (error.response?.status === 401) {
-      // Token hết hạn hoặc không hợp lệ → xoá auth và redirect login
-      useAuthStore.getState().clearAuth()
+
+      // logout đúng function trong store
+      useAuthStore.getState().logout()
+
+      // chuyển về login
       window.location.href = '/login'
     }
+
     return Promise.reject(error)
   }
 )

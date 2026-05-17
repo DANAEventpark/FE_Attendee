@@ -1,7 +1,14 @@
+
+import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
+
 const AboutPage = () => {
+
     return (
         /* Sử dụng màu nền kem #fdf5e6 bằng class custom và font chữ hệ thống */
         <div className="bg-[#fdf5e6] min-h-screen font-sans">
+            <Navbar />
+
             
             {/* Phần Header xanh đen - Sử dụng màu #2d3e50 custom */}
             <div className="bg-[#2d3e50] text-white text-center py-[70px] px-5">
@@ -59,8 +66,9 @@ const AboutPage = () => {
 
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };
 
-export default AboutPage;
+export default AboutPage;

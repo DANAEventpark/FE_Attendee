@@ -1,8 +1,14 @@
-import { createBrowserRouter } from 'react-router-dom'
-import HomePage from '@/pages/HomePage'
-import CategoryPage from '@/pages/CategoryPage'; 
-import EventByCategoryPage from '@/pages/EventByCategoryPage';
-import AboutPage from '@/pages/AboutPage';
+import { createBrowserRouter, Navigate } from 'react-router-dom'
+import HomePage from '@/pages/homepage'
+import LoginPage from '@/pages/LoginPage'
+import RegisterPage from '@/pages/RegisterPage'
+import ProtectedRoute from '@/components/ProtectedRoute'
+import CategoryPage from '@/pages/CategoryPage'
+import EventByCategoryPage from '@/pages/EventByCategoryPage'
+import AboutPage from '@/pages/AboutPage'
+import EventDetailPage from '@/pages/EventDetailPage'
+
+
 /**
  * Router Configuration — FE_Attendee
  * Quản lý tất cả các route của ứng dụng
@@ -14,22 +20,33 @@ const router = createBrowserRouter([
     element: <HomePage />,
   },
   {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
+  },
+  {
+    path: '/events/:id',
+    element: <EventDetailPage />
+  },
+  {
     path: '/categories',
     element: <CategoryPage />,
   },
   {
-    path: "/categories/:id/events",
+    path: '/categories/:id/events',
     element: <EventByCategoryPage />
   },
   {
-    path: "/about",
+    path: '/about',
     element: <AboutPage />
+  },
+  {
+    path: '*',
+    element: <Navigate to="/" replace />
   }
-  // Các route sẽ được thêm theo từng REQ:
-  // { path: '/login', element: <LoginPage /> },
-  // { path: '/events', element: <EventListPage /> },
-  // { path: '/events/:id', element: <EventDetailPage /> },
-  // { path: '/profile', element: <ProfilePage /> },
 ])
 
 export default router

@@ -4,8 +4,28 @@ import {
   FaStar,
   FaClock,
 } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
 
 import heroFallback from '@/assets/hero.png'
+import artImg from '@/assets/art.jpg'
+import communityImg from '@/assets/community.jpg'
+import educationImg from '@/assets/education.jpg'
+import foodImg from '@/assets/food.jpg'
+import musicImg from '@/assets/music.jpg'
+import sportsImg from '@/assets/sports.jpg'
+
+// Map category image string to imported assets
+const getCategoryImage = (imageName) => {
+  switch (imageName) {
+    case 'art.jpg': return artImg
+    case 'community.jpg': return communityImg
+    case 'education.jpg': return educationImg
+    case 'food.jpg': return foodImg
+    case 'music.jpg': return musicImg
+    case 'sports.jpg': return sportsImg
+    default: return musicImg
+  }
+}
 
 const DATE_FORMATTER = new Intl.DateTimeFormat('vi-VN', {
   day: '2-digit',
@@ -35,7 +55,9 @@ function formatDateRange(startTime, endTime) {
 }
 
 export default function EventCard({ event }) {
-  const displayImage = event.category?.image_url || heroFallback
+  const navigate = useNavigate()
+
+  const displayImage = event.category?.image ? getCategoryImage(event.category.image) : heroFallback
   const categoryName = event.category?.name ?? 'Sự kiện'
   const rating = Number(event.reviews_avg_rating ?? 0)
   const totalSlots = event.capacity ?? 0
@@ -45,7 +67,7 @@ export default function EventCard({ event }) {
   return (
     <article className="w-[360px] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)] font-sans">
       
-      {/* 1. HÌNH ẢNH & BADGE DANH MỤC (Giống ảnh mẫu) */}
+      {/* 1. HÌNH ẢNH & BADGE DANH MỤC */}
       <div className="relative h-48 overflow-hidden">
         <img
           src={displayImage}
@@ -56,6 +78,7 @@ export default function EventCard({ event }) {
             imageEvent.currentTarget.src = heroFallback
           }}
         />
+        {/* Badge danh mục */}
         <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-[#cc2bd6] px-4 py-1 text-sm font-semibold text-white shadow-sm">
           {categoryName}
         </span>
@@ -69,6 +92,7 @@ export default function EventCard({ event }) {
           {event.title}
         </h3>
 
+        {/* 3. ĐẦY ĐỦ THÔNG TIN TỪ CODE CŨ */}
         <div className="space-y-2.5 text-[15px] text-[#7d5142] font-medium">
           {/* Thời gian diễn ra */}
           <div className="flex items-start gap-2.5">
@@ -82,7 +106,7 @@ export default function EventCard({ event }) {
             <span>{event.location ?? 'Đang cập nhật địa điểm'}</span>
           </div>
 
-          {/* Hạn đăng ký (Vẫn hiển thị đầy đủ) */}
+          {/* Hạn đăng ký */}
           <div className="flex items-start gap-2.5">
             <FaClock className="text-[16px] text-slate-500 mt-1 shrink-0" />
             <span>
@@ -91,9 +115,9 @@ export default function EventCard({ event }) {
           </div>
         </div>
 
-        {/* 4. SLOT CÒN LẠI & RATING  */}
+        {/* 4. SLOT CÒN LẠI & RATING */}
         <div className="flex items-center justify-between pt-1">
-          {/* Hiển thị số slot dạng Còn X/Y slot */}
+          {/* Hiển thị số slot */}
           <p className="text-[16px] font-bold text-[#2d4a57]">
             Còn {remainingSlots}/{totalSlots} slot
           </p>
@@ -105,9 +129,10 @@ export default function EventCard({ event }) {
           </div>
         </div>
 
-      
+        {/* 5. NÚT XEM CHI TIẾT */}
         <button 
           type="button"
+          onClick={() => navigate(`/events/${event.id}`)}
           className="w-full rounded-[14px] bg-[#e14d34] py-3 text-center text-[16px] font-bold text-white transition-all duration-200 hover:bg-[#c93f28] active:scale-[0.98]"
         >
           Xem chi tiết
