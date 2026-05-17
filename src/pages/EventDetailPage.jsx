@@ -37,34 +37,17 @@ const EventDetailPage = () => {
     const [registering, setRegistering] = useState(false);
     const [submittingReview, setSubmittingReview] = useState(false);
 
+    const [error, setError] = useState(null);
+
     useEffect(() => {
         const fetchEvent = async () => {
             try {
                 // Assuming backend is on port 8000
-                const response = await axios.get(`http://127.0.0.1:8000/api/events/${id}`);
+                const response = await axios.get(`http://localhost:8000/api/events/${id}`);
                 setEvent(response.data.data);
-            } catch (error) {
-                console.error("Error fetching event details", error);
-                // Fallback dummy data for visual testing if API fails
-                setEvent({
-                    id: id,
-                    title: "Hoà nhạc cộng đồng mùa hè 2025",
-                    description: "Chào đón mùa hè rực rỡ với đêm nhạc cộng đồng đầy màu sắc!\n\n\"Hoà nhạc cộng đồng mùa hè 2026\" là không gian âm nhạc ngoài trời dành cho mọi lứa tuổi, nơi các nghệ sĩ tài năng sẽ mang đến những giai điệu sôi động và đầy cảm hứng.\n\nSự kiện không chỉ là buổi biểu diễn âm nhạc mà còn là dịp để cộng đồng kết nối, chia sẻ những khoảnh khắc vui vẻ dưới bầu trời đêm mùa hè tuyệt đẹp. Đừng bỏ lỡ cơ hội tham gia và tạo nên những kỉ niệm.",
-                    start_time: "2026-05-15T18:00:00",
-                    end_time: "2026-05-15T23:00:00",
-                    location: "Sân khấu trung tâm VH",
-                    status: "published",
-                    capacity: 1000,
-                    registration_deadline: "2026-05-13T23:59:59",
-                    category: { name: "Âm nhạc", image: "music.jpg" },
-                    organizer: { name: "Nguyễn Văn A" },
-                    registrations: [
-                        { user: { name: "Nguyen Tuan" } },
-                        { user: { name: "Ngo Thao" } },
-                        { user: { name: "Ngoc Tram" } }
-                    ],
-                    reviews: []
-                });
+            } catch (err) {
+                console.error("Error fetching event details", err);
+                setError(err.response?.data?.message || "Không thể tải dữ liệu sự kiện.");
             } finally {
                 setLoading(false);
             }
@@ -81,12 +64,12 @@ const EventDetailPage = () => {
                 setRegistering(false);
                 return;
             }
-            await axios.post(`http://127.0.0.1:8000/api/events/${id}/register`, {}, {
+            await axios.post(`http://localhost:8000/api/events/${id}/register`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert("Đăng ký thành công!");
             // reload data
-            const res = await axios.get(`http://127.0.0.1:8000/api/events/${id}`);
+            const res = await axios.get(`http://localhost:8000/api/events/${id}`);
             setEvent(res.data.data);
         } catch (error) {
             alert(error.response?.data?.message || "Đã có lỗi xảy ra");
@@ -110,7 +93,7 @@ const EventDetailPage = () => {
                 return;
             }
             
-            await axios.post(`http://127.0.0.1:8000/api/events/${id}/reviews`, {
+            await axios.post(`http://localhost:8000/api/events/${id}/reviews`, {
                 rating,
                 comment
             }, {
@@ -122,7 +105,7 @@ const EventDetailPage = () => {
             setRating(0);
             
             // reload data
-            const res = await axios.get(`http://127.0.0.1:8000/api/events/${id}`);
+            const res = await axios.get(`http://localhost:8000/api/events/${id}`);
             setEvent(res.data.data);
         } catch (error) {
             alert(error.response?.data?.message || "Đã có lỗi xảy ra");
@@ -132,6 +115,7 @@ const EventDetailPage = () => {
     };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#fdfaf2]">Loading...</div>;
+    if (error) return <div className="min-h-screen flex items-center justify-center bg-[#fdfaf2] text-red-500 font-medium">{error}</div>;
     if (!event) return <div className="min-h-screen flex items-center justify-center bg-[#fdfaf2]">Event not found</div>;
 
     const bannerImg = event.category ? getCategoryImage(event.category.image) : musicImg;
