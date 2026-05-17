@@ -1,41 +1,164 @@
-import { Link } from 'react-router-dom';
+import { useDeferredValue, useEffect, useState } from 'react'
 
-/**
- * HomePage — FE_Attendee
- * Placeholder cho trang chủ người tham dự
- * Sẽ được phát triển đầy đủ trong các REQ tiếp theo
- */
-const HomePage = () => {
+import Navbar from '@/components/layout/Navbar'
+import Footer from '@/components/layout/Footer'
+
+import Hero from '@/components/hero/Hero'
+
+import SearchBar from '@/components/filters/SearchBar'
+import CategoriesList from '@/components/filters/CategoriesList'
+
+import EventResults from '@/components/events/EventResults'
+
+import useEvents from '@/hooks/useEvents'
+import { getCategories } from '@/services/categoryService'
+
+export default function HomePage() {
+
+  const [categories, setCategories] = useState([])
+
+  const [searchTerm, setSearchTerm] =
+    useState('')
+
+  const [activeCategoryId, setActiveCategoryId] =
+    useState('all')
+
+  const [timeFilter, setTimeFilter] =
+    useState('upcoming')
+
+  const deferredSearchTerm =
+    useDeferredValue(searchTerm)
+
+  const {
+    events,
+    pagination,
+    loading,
+    error,
+    page,
+    setPage,
+  } = useEvents(
+    1,
+    deferredSearchTerm,
+    activeCategoryId,
+    timeFilter
+  )
+
+  useEffect(() => {
+
+    async function loadCategories() {
+
+      try {
+
+        const response =
+          await getCategories()
+
+        setCategories(
+          response.data || response
+        )
+
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    loadCategories()
+
+  }, [])
+
+  const registeredPreview = events.reduce(
+    (total, event) =>
+      total +
+      Number(
+        event.confirmed_registrations_count ?? 0
+      ),
+    0
+  )
+
+  const handlePageChange = (newPage) => {
+
+    if (
+      newPage < 1 ||
+      newPage > pagination.lastPage
+    ) {
+      return
+    }
+
+    setPage(newPage)
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }
+
   return (
-    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-white mb-4">
-          🎉 DANAEventpark
-        </h1>
-        <p className="text-slate-400 text-lg">
-          Nền tảng khám phá sự kiện tại Đà Nẵng
-        </p>
-        <span className="inline-block mt-4 px-4 py-2 bg-teal-600 text-white rounded-full text-sm">
-          FE_Attendee — dev
-        </span>
-        <div className="flex gap-4 mt-8 justify-center">
-          <Link 
-            to="/login" 
-            className="px-6 py-3 bg-[#E53E3E] text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
-          >
-            Đăng nhập
-          </Link>
-          <Link 
-            to="/register" 
-            className="px-6 py-3 border border-[#E53E3E] text-[#E53E3E] rounded-lg font-medium hover:bg-red-50 transition-colors"
-          >
-            Đăng ký
-          </Link>
+    <div className="min-h-screen bg-[#f4efe7] text-slate-900">
+
+      <Navbar />
+
+      <Hero
+        totalEvents={pagination.total ?? 0}
+        categoriesCount={categories.length}
+        registeredPreview={registeredPreview}
+      />
+
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        timeFilter={timeFilter}
+        onTimeFilterChange={setTimeFilter}
+      />
+
+      <CategoriesList
+        categories={categories}
+        activeCategoryId={activeCategoryId}
+        onSelectCategory={setActiveCategoryId}
+      />
+
+      <main className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
+
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+
+          <div>
+
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#e96a52]">
+              Event feed
+            </p>
+
+            <h2 className="mt-2 text-3xl font-bold text-slate-900">
+              Các sự kiện nổi bật
+            </h2>
+            {searchTerm && (
+              <p className="mt-3 text-sm text-slate-500">
+                Kết quả tìm kiếm cho:
+                <span className="ml-1 font-semibold text-[#e96a52]">
+                  "{searchTerm}"
+                </span>
+              </p>
+            )}
+          </div>
+
+          <div className="rounded-2xl bg-white px-5 py-4 text-sm text-slate-500 shadow-sm">
+
+            Trang {pagination.currentPage} / {pagination.lastPage}
+
+          </div>
+
         </div>
 
-      </div>
+        <EventResults
+          loading={loading}
+          error={error}
+          events={events}
+          pagination={pagination}
+          page={page}
+          onPageChange={handlePageChange}
+        />
+
+      </main>
+
+      <Footer />
+
     </div>
   )
 }
-
-export default HomePage
