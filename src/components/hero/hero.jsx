@@ -23,8 +23,8 @@ const heroPosters = [
 
 export default function Hero({
   totalEvents = 0,
-  categoriesCount = 0,
-  registeredPreview = 0,
+  totalRegistrations = 0,
+  totalOrganizers = 0,
 }) {
   return (
     <section className="bg-[#173846] pb-24 text-white">
@@ -63,13 +63,13 @@ export default function Hero({
             </div>
 
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
-              <p className="text-3xl font-bold text-white">{registeredPreview}</p>
-              <p className="mt-2 text-sm text-white/60">Lượt đăng ký nổi bật</p>
+              <p className="text-3xl font-bold text-white">{totalRegistrations}</p>
+              <p className="mt-2 text-sm text-white/60">Lượt đăng ký tham gia</p>
             </div>
 
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
-              <p className="text-3xl font-bold text-white">{categoriesCount}</p>
-              <p className="mt-2 text-sm text-white/60">Danh mục đang có</p>
+              <p className="text-3xl font-bold text-white">{totalOrganizers}</p>
+              <p className="mt-2 text-sm text-white/60">Nhà tổ chức đồng hành</p>
             </div>
           </div>
         </div>

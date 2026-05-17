@@ -12,22 +12,23 @@ import EventResults from '@/components/events/EventResults'
 
 import useEvents from '@/hooks/useEvents'
 import { getCategories } from '@/services/categoryService'
+import { getSystemStats } from '@/services/eventService'
 
 export default function HomePage() {
 
   const [categories, setCategories] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeCategoryId, setActiveCategoryId] = useState('all')
+  const [timeFilter, setTimeFilter] = useState('upcoming')
 
-  const [searchTerm, setSearchTerm] =
-    useState('')
+  // State for dynamic system stats
+  const [stats, setStats] = useState({
+    totalEvents: 0,
+    totalRegistrations: 0,
+    totalOrganizers: 0
+  })
 
-  const [activeCategoryId, setActiveCategoryId] =
-    useState('all')
-
-  const [timeFilter, setTimeFilter] =
-    useState('upcoming')
-
-  const deferredSearchTerm =
-    useDeferredValue(searchTerm)
+  const deferredSearchTerm = useDeferredValue(searchTerm)
 
   const {
     events,
@@ -44,25 +45,26 @@ export default function HomePage() {
   )
 
   useEffect(() => {
-
-    async function loadCategories() {
-
+    async function loadInitialData() {
       try {
+        // 1. Fetch categories
+        const catRes = await getCategories()
+        setCategories(catRes.data || catRes)
 
-        const response =
-          await getCategories()
-
-        setCategories(
-          response.data || response
-        )
-
+        // 2. Fetch system stats
+        const statsRes = await getSystemStats()
+        if (statsRes.success) {
+          setStats({
+            totalEvents: statsRes.data.total_events,
+            totalRegistrations: statsRes.data.total_registrations,
+            totalOrganizers: statsRes.data.total_organizers
+          })
+        }
       } catch (error) {
-        console.error(error)
+        console.error("Lỗi khi tải số liệu hệ thống:", error)
       }
     }
-
-    loadCategories()
-
+    loadInitialData()
   }, [])
 
   const registeredPreview = events.reduce(
@@ -97,9 +99,9 @@ export default function HomePage() {
       <Navbar />
 
       <Hero
-        totalEvents={pagination.total ?? 0}
-        categoriesCount={categories.length}
-        registeredPreview={registeredPreview}
+        totalEvents={stats.totalEvents}
+        totalRegistrations={stats.totalRegistrations}
+        totalOrganizers={stats.totalOrganizers}
       />
 
       <SearchBar

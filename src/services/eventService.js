@@ -14,3 +14,8 @@ export const getEvents = async (page = 1, search = '', categoryId = 'all', timeF
   })
   return response.data
 }
+
+export const getSystemStats = async () => {
+  const response = await client.get('/system-stats') 
+  return response.data
+}
