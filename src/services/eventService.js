@@ -1,8 +1,10 @@
-import api from './api'
+import client from '@/api/client'
+
 
 // Đảm bảo thứ tự nhận vào đúng là: page -> search -> categoryId -> timeFilter
 export const getEvents = async (page = 1, search = '', categoryId = 'all', timeFilter = 'upcoming') => {
-  const response = await api.get('/events', {
+  const response = await client.get('/events', {
+
     params: {
       page: page,
       search: search,
