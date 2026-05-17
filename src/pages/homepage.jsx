@@ -12,22 +12,23 @@ import EventResults from '@/components/events/EventResults'
 
 import useEvents from '@/hooks/useEvents'
 import { getCategories } from '@/services/categoryService'
+// Import thêm hàm getSystemStats từ file eventService của bạn
+import { getSystemStats } from '@/services/eventService' 
 
 export default function HomePage() {
-
   const [categories, setCategories] = useState([])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [activeCategoryId, setActiveCategoryId] = useState('all')
+  const [timeFilter, setTimeFilter] = useState('upcoming')
 
-  const [searchTerm, setSearchTerm] =
-    useState('')
+  // KHAI BÁO STATE LƯU SỐ THỐNG KÊ CỨNG TOÀN HỆ THỐNG
+  const [stats, setStats] = useState({
+    totalEvents: 0,
+    totalRegistrations: 0,
+    totalOrganizers: 0
+  })
 
-  const [activeCategoryId, setActiveCategoryId] =
-    useState('all')
-
-  const [timeFilter, setTimeFilter] =
-    useState('upcoming')
-
-  const deferredSearchTerm =
-    useDeferredValue(searchTerm)
+  const deferredSearchTerm = useDeferredValue(searchTerm)
 
   const {
     events,
@@ -43,39 +44,32 @@ export default function HomePage() {
     timeFilter
   )
 
+  // Gọi các API load dữ liệu hệ thống ngay khi vừa mount component
   useEffect(() => {
-
-    async function loadCategories() {
-
+    async function loadInitialData() {
       try {
+        // 1. Tải danh mục sự kiện
+        const catResponse = await getCategories()
+        setCategories(catResponse.data || catResponse)
 
-        const response =
-          await getCategories()
-
-        setCategories(
-          response.data || response
-        )
-
+        // 2. Tải số liệu thống kê cứng từ database
+        const statsResponse = await getSystemStats()
+        if (statsResponse.success) {
+          setStats({
+            totalEvents: statsResponse.data.total_events,
+            totalRegistrations: statsResponse.data.total_registrations,
+            totalOrganizers: statsResponse.data.total_organizers
+          })
+        }
       } catch (error) {
-        console.error(error)
+        console.error("Lỗi khi tải dữ liệu ban đầu:", error)
       }
     }
 
-    loadCategories()
-
+    loadInitialData()
   }, [])
 
-  const registeredPreview = events.reduce(
-    (total, event) =>
-      total +
-      Number(
-        event.confirmed_registrations_count ?? 0
-      ),
-    0
-  )
-
   const handlePageChange = (newPage) => {
-
     if (
       newPage < 1 ||
       newPage > pagination.lastPage
@@ -93,13 +87,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#f4efe7] text-slate-900">
-
       <Navbar />
 
+      {/* TRUYỀN CÁC SỐ THỐNG KÊ CỨNG LẤY TỪ DATABASE VÀO ĐÂY */}
       <Hero
-        totalEvents={pagination.total ?? 0}
-        categoriesCount={categories.length}
-        registeredPreview={registeredPreview}
+        totalEvents={stats.totalEvents}
+        totalRegistrations={stats.totalRegistrations}
+        totalOrganizers={stats.totalOrganizers}
       />
 
       <SearchBar
@@ -116,11 +110,8 @@ export default function HomePage() {
       />
 
       <main className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-
           <div>
-
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#e96a52]">
               Event feed
             </p>
@@ -139,11 +130,8 @@ export default function HomePage() {
           </div>
 
           <div className="rounded-2xl bg-white px-5 py-4 text-sm text-slate-500 shadow-sm">
-
             Trang {pagination.currentPage} / {pagination.lastPage}
-
           </div>
-
         </div>
 
         <EventResults
@@ -154,11 +142,9 @@ export default function HomePage() {
           page={page}
           onPageChange={handlePageChange}
         />
-
       </main>
 
       <Footer />
-
     </div>
   )
 }

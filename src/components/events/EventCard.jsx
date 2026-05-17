@@ -7,7 +7,6 @@ import {
 
 import heroFallback from '@/assets/hero.png'
 
-// GIỮ NGUYÊN CÁC HÀM FORMAT DỮ LIỆU CỦA BẠN
 const DATE_FORMATTER = new Intl.DateTimeFormat('vi-VN', {
   day: '2-digit',
   month: 'short',
@@ -36,7 +35,6 @@ function formatDateRange(startTime, endTime) {
 }
 
 export default function EventCard({ event }) {
-  // GIỮ NGUYÊN LOGIC DỮ LIỆU CỦA BẠN
   const displayImage = event.category?.image_url || heroFallback
   const categoryName = event.category?.name ?? 'Sự kiện'
   const rating = Number(event.reviews_avg_rating ?? 0)
@@ -58,13 +56,12 @@ export default function EventCard({ event }) {
             imageEvent.currentTarget.src = heroFallback
           }}
         />
-        {/* Badge danh mục màu hồng cánh sen bo tròn đè lên ảnh */}
         <span className="absolute left-4 top-4 inline-flex items-center rounded-full bg-[#cc2bd6] px-4 py-1 text-sm font-semibold text-white shadow-sm">
           {categoryName}
         </span>
       </div>
 
-      {/* KHỐI NỘI DUNG CHÍNH (Format Tailwind) */}
+      {/* KHỐI NỘI DUNG CHÍNH */}
       <div className="p-5 space-y-4">
         
         {/* 2. TIÊU ĐỀ SỰ KIỆN */}
@@ -72,7 +69,6 @@ export default function EventCard({ event }) {
           {event.title}
         </h3>
 
-        {/* 3. ĐẦY ĐỦ THÔNG TIN TỪ CODE CŨ (Đã tinh chỉnh icon gọn gàng) */}
         <div className="space-y-2.5 text-[15px] text-[#7d5142] font-medium">
           {/* Thời gian diễn ra */}
           <div className="flex items-start gap-2.5">
@@ -95,7 +91,7 @@ export default function EventCard({ event }) {
           </div>
         </div>
 
-        {/* 4. SLOT CÒN LẠI & RATING (Gom nhóm gọn gàng trên nút) */}
+        {/* 4. SLOT CÒN LẠI & RATING  */}
         <div className="flex items-center justify-between pt-1">
           {/* Hiển thị số slot dạng Còn X/Y slot */}
           <p className="text-[16px] font-bold text-[#2d4a57]">
@@ -109,7 +105,7 @@ export default function EventCard({ event }) {
           </div>
         </div>
 
-        {/* 5. NÚT XEM CHI TIẾT (Màu cam đỏ giống hệt ảnh mẫu) */}
+      
         <button 
           type="button"
           className="w-full rounded-[14px] bg-[#e14d34] py-3 text-center text-[16px] font-bold text-white transition-all duration-200 hover:bg-[#c93f28] active:scale-[0.98]"

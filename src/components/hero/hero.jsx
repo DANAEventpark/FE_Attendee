@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { FaArrowRight } from "react-icons/fa";
+import api from "../../services/api"; 
 
 const heroPosters = [
   {
@@ -21,11 +23,31 @@ const heroPosters = [
   },
 ];
 
-export default function Hero({
-  totalEvents = 0,
-  categoriesCount = 0,
-  registeredPreview = 0,
-}) {
+export default function Hero() {
+
+  const [stats, setStats] = useState({
+    total_events: 0,
+    total_registrations: 0,
+    total_organizers: 0,
+  });
+
+  // Tự động gọi API khi component Hero được hiển thị trên trang chủ
+  useEffect(() => {
+    const fetchSystemStats = async () => {
+      try {
+        const response = await api.get("/system-stats");
+        
+        if (response.data && response.data.success) {
+          setStats(response.data.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi fetch dữ liệu thống kê hệ thống:", error);
+      }
+    };
+
+    fetchSystemStats();
+  }, []);
+
   return (
     <section className="bg-[#173846] pb-24 text-white">
       <div className="mx-auto grid max-w-6xl gap-12 px-4 pt-6 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
@@ -42,7 +64,7 @@ export default function Hero({
 
           <p className="mt-5 max-w-xl text-base leading-7 text-white/72 sm:text-lg">
             Từ âm nhạc, workshop đến hoạt động cộng đồng, mọi trải nghiệm nổi bật
-            đều được gom lại để bạn dễ chọn và dễ tham gia.
+             đều được gom lại để bạn dễ chọn và dễ tham gia.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
@@ -52,27 +74,32 @@ export default function Hero({
             </button>
 
             <p className="text-sm text-white/60">
-              {totalEvents} sự kiện đang mở đăng ký
+              {stats.total_events} sự kiện đang mở đăng ký
             </p>
           </div>
 
+      
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
+           
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
-              <p className="text-3xl font-bold text-white">{totalEvents}</p>
-              <p className="mt-2 text-sm text-white/60">Sự kiện phù hợp</p>
+              <p className="text-3xl font-bold text-white">{stats.total_events}</p>
+              <p className="mt-2 text-sm text-white/60">Sự kiện đang mở</p>
             </div>
 
+         
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
-              <p className="text-3xl font-bold text-white">{registeredPreview}</p>
-              <p className="mt-2 text-sm text-white/60">Lượt đăng ký nổi bật</p>
+              <p className="text-3xl font-bold text-white">{stats.total_registrations}</p>
+              <p className="mt-2 text-sm text-white/60">Người đăng ký</p>
             </div>
 
+      
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
-              <p className="text-3xl font-bold text-white">{categoriesCount}</p>
-              <p className="mt-2 text-sm text-white/60">Danh mục đang có</p>
+              <p className="text-3xl font-bold text-white">{stats.total_organizers}</p>
+              <p className="mt-2 text-sm text-white/60">Ban tổ chức đối tác</p>
             </div>
           </div>
         </div>
+
 
         <div className="flex items-center justify-center gap-4 lg:justify-end">
           {heroPosters.map((poster, index) => (
