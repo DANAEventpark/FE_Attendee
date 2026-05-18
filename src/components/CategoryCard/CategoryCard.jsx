@@ -3,12 +3,18 @@ import { Link } from 'react-router-dom';
 const CategoryCard = (props) => {
     const getIcon = (name) => {
         switch (name) {
-            case 'Music': return '🎸';
-            case 'Sports': return '⚽';
-            case 'Food': return '🍜';
-            case 'Art': return '🎨';
-            case 'Education': return '📚';
-            case 'Community': return '👥';
+            case 'Music':
+            case 'Âm nhạc': return '🎸';
+            case 'Sports':
+            case 'Thể thao': return '⚽';
+            case 'Food':
+            case 'Ẩm thực': return '🍜';
+            case 'Art':
+            case 'Nghệ thuật': return '🎨';
+            case 'Education':
+            case 'Giáo dục': return '📚';
+            case 'Community':
+            case 'Cộng đồng': return '👥';
             default: return '📁';
         }
     };
