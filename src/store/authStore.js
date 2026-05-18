@@ -6,14 +6,24 @@ export const useAuthStore = create(
     (set) => ({
       user: null,
       token: null,
+
       login: (user, token) => set({ user, token }),
       logout: () => set({ user: null, token: null }),
+
+      setAuth: (user, token) => set({ user, token }),
+      clearAuth: () => set({ user: null, token: null }),
     }),
     {
-      name: 'auth-storage-attendee', // must be unique across the same domain if sharing port, but different repos usually have different ports
+      name: 'auth-storage-attendee',
     }
   )
 );
 
 export const useIsLoggedIn = () => useAuthStore((state) => !!state.token);
-export const useIsAttendee = () => useAuthStore((state) => state.user?.role === 'attendee');
+
+export const useIsAttendee = () => useAuthStore((state) => {
+  const roleName = typeof state.user?.role === 'object' ? state.user?.role?.name : state.user?.role;
+  return roleName === 'attendee';
+});
+
+export default useAuthStore;

@@ -1,5 +1,5 @@
 import logo from "../../assets/logoevent.png";
-import useAuthStore from "@/stores/useAuthStore";
+import useAuthStore from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
 
 export default function Navbar() {
