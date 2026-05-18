@@ -23,7 +23,8 @@ const LoginPage = () => {
       const response = await loginApi({ email, password });
       const { user, token } = response.data.data;
       
-      if (user.role !== 'attendee') {
+      const roleName = typeof user.role === 'object' ? user.role?.name : user.role;
+      if (roleName !== 'attendee') {
         setError('Tài khoản không có quyền người tham gia.');
         setLoading(false);
         return;
