@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { FaArrowRight } from "react-icons/fa";
+import api from "../../services/api"; 
 
 const heroPosters = [
   {
@@ -21,11 +23,29 @@ const heroPosters = [
   },
 ];
 
-export default function Hero({
-  totalEvents = 0,
-  totalRegistrations = 0,
-  totalOrganizers = 0,
-}) {
+export default function Hero() {
+  const [stats, setStats] = useState({
+    total_events: 0,
+    total_registrations: 0,
+    total_organizers: 0,
+  });
+
+  // Fetch system stats automatically on component mount
+  useEffect(() => {
+    const fetchSystemStats = async () => {
+      try {
+        const response = await api.get("/system-stats");
+        if (response.data && response.data.success) {
+          setStats(response.data.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi fetch dữ liệu thống kê hệ thống:", error);
+      }
+    };
+
+    fetchSystemStats();
+  }, []);
+
   return (
     <section className="bg-[#173846] pb-24 text-white">
       <div className="mx-auto grid max-w-6xl gap-12 px-4 pt-6 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
@@ -52,23 +72,23 @@ export default function Hero({
             </button>
 
             <p className="text-sm text-white/60">
-              {totalEvents} sự kiện đang mở đăng ký
+              {stats.total_events} sự kiện đang mở đăng ký
             </p>
           </div>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
-              <p className="text-3xl font-bold text-white">{totalEvents}</p>
-              <p className="mt-2 text-sm text-white/60">Sự kiện phù hợp</p>
+              <p className="text-3xl font-bold text-white">{stats.total_events}</p>
+              <p className="mt-2 text-sm text-white/60">Sự kiện đang mở</p>
             </div>
 
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
-              <p className="text-3xl font-bold text-white">{totalRegistrations}</p>
+              <p className="text-3xl font-bold text-white">{stats.total_registrations}</p>
               <p className="mt-2 text-sm text-white/60">Lượt đăng ký tham gia</p>
             </div>
 
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
-              <p className="text-3xl font-bold text-white">{totalOrganizers}</p>
+              <p className="text-3xl font-bold text-white">{stats.total_organizers}</p>
               <p className="mt-2 text-sm text-white/60">Nhà tổ chức đồng hành</p>
             </div>
           </div>
