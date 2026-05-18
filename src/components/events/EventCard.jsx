@@ -65,10 +65,10 @@ export default function EventCard({ event }) {
   const remainingSlots = Math.max(0, totalSlots - registeredCount)
 
   return (
-    <article className="w-[360px] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)] font-sans">
+    <article className="flex flex-col h-full overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_rgba(15,23,42,0.06)] font-sans">
       
       {/* 1. HÌNH ẢNH & BADGE DANH MỤC */}
-      <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden shrink-0">
         <img
           src={displayImage}
           alt={event.title}
@@ -85,58 +85,61 @@ export default function EventCard({ event }) {
       </div>
 
       {/* KHỐI NỘI DUNG CHÍNH */}
-      <div className="p-5 space-y-4">
-        
-        {/* 2. TIÊU ĐỀ SỰ KIỆN */}
-        <h3 className="text-[21px] font-bold text-[#2d4a57] leading-snug">
-          {event.title}
-        </h3>
+      <div className="p-5 flex-1 flex flex-col justify-between">
+        <div className="space-y-4">
+          {/* 2. TIÊU ĐỀ SỰ KIỆN */}
+          <h3 className="text-[21px] font-bold text-[#2d4a57] leading-snug line-clamp-2 min-h-[3.25rem]">
+            {event.title}
+          </h3>
 
-        {/* 3. ĐẦY ĐỦ THÔNG TIN TỪ CODE CŨ */}
-        <div className="space-y-2.5 text-[15px] text-[#7d5142] font-medium">
-          {/* Thời gian diễn ra */}
-          <div className="flex items-start gap-2.5">
-            <FaCalendarAlt className="text-[16px] text-slate-500 mt-1 shrink-0" />
-            <span>{formatDateRange(event.start_time, event.end_time)}</span>
-          </div>
+          {/* 3. ĐẦY ĐỦ THÔNG TIN TỪ CODE CŨ */}
+          <div className="space-y-2.5 text-[15px] text-[#7d5142] font-medium">
+            {/* Thời gian diễn ra */}
+            <div className="flex items-start gap-2.5">
+              <FaCalendarAlt className="text-[16px] text-slate-500 mt-1 shrink-0" />
+              <span className="line-clamp-1">{formatDateRange(event.start_time, event.end_time)}</span>
+            </div>
 
-          {/* Địa điểm */}
-          <div className="flex items-start gap-2.5">
-            <FaMapMarkerAlt className="text-[17px] text-slate-500 mt-0.5 shrink-0" />
-            <span>{event.location ?? 'Đang cập nhật địa điểm'}</span>
-          </div>
+            {/* Địa điểm */}
+            <div className="flex items-start gap-2.5">
+              <FaMapMarkerAlt className="text-[17px] text-slate-500 mt-0.5 shrink-0" />
+              <span className="line-clamp-1" title={event.location}>{event.location ?? 'Đang cập nhật địa điểm'}</span>
+            </div>
 
-          {/* Hạn đăng ký */}
-          <div className="flex items-start gap-2.5">
-            <FaClock className="text-[16px] text-slate-500 mt-1 shrink-0" />
-            <span>
-              Hạn đăng ký: <b className="text-slate-900 font-semibold">{formatDate(event.registration_deadline)}</b>
-            </span>
-          </div>
-        </div>
-
-        {/* 4. SLOT CÒN LẠI & RATING */}
-        <div className="flex items-center justify-between pt-1">
-          {/* Hiển thị số slot */}
-          <p className="text-[16px] font-bold text-[#2d4a57]">
-            Còn {remainingSlots}/{totalSlots} slot
-          </p>
-          
-          {/* Số điểm đánh giá sao */}
-          <div className="flex items-center gap-1 text-sm font-semibold text-slate-600">
-            <FaStar className="text-amber-400 text-base" />
-            <span>{rating > 0 ? rating.toFixed(1) : 'Mới'}</span>
+            {/* Hạn đăng ký */}
+            <div className="flex items-start gap-2.5">
+              <FaClock className="text-[16px] text-slate-500 mt-1 shrink-0" />
+              <span className="line-clamp-1">
+                Hạn đăng ký: <b className="text-slate-900 font-semibold">{formatDate(event.registration_deadline)}</b>
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* 5. NÚT XEM CHI TIẾT */}
-        <button 
-          type="button"
-          onClick={() => navigate(`/events/${event.id}`)}
-          className="w-full rounded-[14px] bg-[#e14d34] py-3 text-center text-[16px] font-bold text-white transition-all duration-200 hover:bg-[#c93f28] active:scale-[0.98]"
-        >
-          Xem chi tiết
-        </button>
+        <div className="mt-4 space-y-4">
+          {/* 4. SLOT CÒN LẠI & RATING */}
+          <div className="flex items-center justify-between pt-1">
+            {/* Hiển thị số slot */}
+            <p className="text-[16px] font-bold text-[#2d4a57]">
+              Còn {remainingSlots}/{totalSlots} slot
+            </p>
+            
+            {/* Số điểm đánh giá sao */}
+            <div className="flex items-center gap-1 text-sm font-semibold text-slate-600">
+              <FaStar className="text-amber-400 text-base" />
+              <span>{rating > 0 ? rating.toFixed(1) : 'Mới'}</span>
+            </div>
+          </div>
+
+          {/* 5. NÚT XEM CHI TIẾT */}
+          <button 
+            type="button"
+            onClick={() => navigate(`/events/${event.id}`)}
+            className="w-full rounded-[14px] bg-[#e14d34] py-3 text-center text-[16px] font-bold text-white transition-all duration-200 hover:bg-[#c93f28] active:scale-[0.98]"
+          >
+            Xem chi tiết
+          </button>
+        </div>
 
       </div>
     </article>
