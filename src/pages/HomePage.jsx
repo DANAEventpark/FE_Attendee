@@ -1,7 +1,6 @@
 import { useDeferredValue, useEffect, useState } from 'react'
 
-import Navbar from '@/components/layout/Navbar'
-import Footer from '@/components/layout/Footer'
+
 
 import Hero from '@/components/hero/Hero'
 
@@ -96,8 +95,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#f4efe7] text-slate-900">
 
-      <Navbar />
-
+      
       <Hero
         totalEvents={stats.totalEvents}
         totalRegistrations={stats.totalRegistrations}
@@ -159,7 +157,6 @@ export default function HomePage() {
 
       </main>
 
-      <Footer />
 
     </div>
   )

@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
+import App from '@/App'
 import HomePage from '@/pages/homepage'
 import LoginPage from '@/pages/LoginPage'
 import RegisterPage from '@/pages/RegisterPage'
@@ -17,35 +18,41 @@ import EventDetailPage from '@/pages/EventDetailPage'
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
-  },
-  {
-    path: '/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/register',
-    element: <RegisterPage />,
-  },
-  {
-    path: '/events/:id',
-    element: <EventDetailPage />
-  },
-  {
-    path: '/categories',
-    element: <CategoryPage />,
-  },
-  {
-    path: '/categories/:id/events',
-    element: <EventByCategoryPage />
-  },
-  {
-    path: '/about',
-    element: <AboutPage />
-  },
-  {
-    path: '*',
-    element: <Navigate to="/" replace />
+    element: <App />,
+    children: [
+      {
+        path: '/',
+        element: <HomePage />,
+      },
+      {
+        path: '/login',
+        element: <LoginPage />,
+      },
+      {
+        path: '/register',
+        element: <RegisterPage />,
+      },
+      {
+        path: '/events/:id',
+        element: <EventDetailPage />
+      },
+      {
+        path: '/categories',
+        element: <CategoryPage />,
+      },
+      {
+        path: '/categories/:id/events',
+        element: <EventByCategoryPage />
+      },
+      {
+        path: '/about',
+        element: <AboutPage />
+      },
+      {
+        path: '*',
+        element: <Navigate to="/" replace />
+      }
+    ]
   }
 ])
 

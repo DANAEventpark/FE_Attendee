@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import client from '@/api/client';
 import CategoryCard from '@/components/CategoryCard/CategoryCard';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
 
 const CategoryPage = () => {
     const [categories, setCategories] = useState([]);
@@ -17,7 +15,6 @@ const CategoryPage = () => {
 
     return (
         <div className="bg-[#fdf5e6] min-h-screen font-sans">
-            <Navbar />
 
             {/* 1. Phần Header xanh đen dùng màu chủ đạo #2d3e50 */}
             <div className="bg-[#2d3e50] text-white text-center py-[70px] px-5">
@@ -39,7 +36,6 @@ const CategoryPage = () => {
                 </div>
             </div>
 
-            <Footer />
         </div>
     );
 };
