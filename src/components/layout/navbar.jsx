@@ -3,12 +3,21 @@ import logo from "../../assets/logoevent.png";
 import useAuthStore from "@/store/authStore";
 import { useNavigate, Link } from "react-router-dom";
 import { Menu, X, User, LogOut } from "lucide-react";
+import RoleSelectionModal from "../common/RoleSelectionModal";
 
 export default function Navbar() {
   const user = useAuthStore((state) => state.user);
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authActionType, setAuthActionType] = useState('login');
+
+  const openAuthModal = (type) => {
+    setAuthActionType(type);
+    setIsAuthModalOpen(true);
+    setIsOpen(false);
+  };
 
   const handleLogout = () => {
     clearAuth();
@@ -79,18 +88,18 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <Link
-                  to="/login"
+                <button
+                  onClick={() => openAuthModal('login')}
                   className="rounded-xl bg-white/10 border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 transition-colors"
                 >
                   Đăng nhập
-                </Link>
-                <Link
-                  to="/register"
+                </button>
+                <button
+                  onClick={() => openAuthModal('register')}
                   className="rounded-xl bg-[#e96a52] px-4 py-2 text-sm font-semibold text-white hover:bg-[#d75c46] transition-colors shadow-lg shadow-orange-500/20"
                 >
                   Đăng ký
-                </Link>
+                </button>
               </div>
             )}
           </div>
@@ -162,26 +171,30 @@ export default function Navbar() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-3">
-                  <Link
-                    to="/login"
-                    onClick={() => setIsOpen(false)}
+                  <button
+                    onClick={() => openAuthModal('login')}
                     className="rounded-xl bg-white/10 border border-white/20 py-2.5 text-center text-sm font-semibold text-white hover:bg-white/20 transition-colors"
                   >
                     Đăng nhập
-                  </Link>
-                  <Link
-                    to="/register"
-                    onClick={() => setIsOpen(false)}
+                  </button>
+                  <button
+                    onClick={() => openAuthModal('register')}
                     className="rounded-xl bg-[#e96a52] py-2.5 text-center text-sm font-semibold text-white hover:bg-[#d75c46] transition-colors"
                   >
                     Đăng ký
-                  </Link>
+                  </button>
                 </div>
               )}
             </div>
           </div>
         )}
       </nav>
+
+      <RoleSelectionModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        actionType={authActionType}
+      />
     </header>
   );
 }
