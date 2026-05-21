@@ -17,20 +17,20 @@ import EventDetailPage from '@/pages/EventDetailPage'
  */
 const router = createBrowserRouter([
   {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
+  },
+  {
     path: '/',
     element: <App />,
     children: [
       {
-        path: '/',
+        index: true,
         element: <HomePage />,
-      },
-      {
-        path: '/login',
-        element: <LoginPage />,
-      },
-      {
-        path: '/register',
-        element: <RegisterPage />,
       },
       {
         path: '/events/:id',
