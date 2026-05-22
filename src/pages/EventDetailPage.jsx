@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuthStore } from '@/store/authStore';
 import artImg from '@/assets/art.jpg';
 import communityImg from '@/assets/community.jpg';
 import educationImg from '@/assets/education.jpg';
@@ -30,6 +31,7 @@ const getCategoryColor = (categoryName) => {
 const EventDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user, token } = useAuthStore();
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [comment, setComment] = useState('');
@@ -54,6 +56,48 @@ const EventDetailPage = () => {
         };
         fetchEvent();
     }, [id]);
+
+    useEffect(() => {
+        if (!event) return;
+
+        // Use the maximum review ID loaded to only receive new reviews
+        const lastId = event.reviews && event.reviews.length > 0 
+            ? Math.max(...event.reviews.map(r => r.id)) 
+            : 0;
+
+        const eventSource = new EventSource(`http://localhost:8000/api/events/${id}/reviews/stream?last_id=${lastId}`);
+
+        eventSource.onmessage = (e) => {
+            if (e.data === ': heartbeat') return;
+            try {
+                const newReview = JSON.parse(e.data);
+                setEvent((prevEvent) => {
+                    if (!prevEvent) return prevEvent;
+                    
+                    // Double check to prevent any duplicates
+                    const exists = prevEvent.reviews.some(r => r.id === newReview.id);
+                    if (exists) return prevEvent;
+
+                    // Stream always prepends new reviews to show them instantly at the top
+                    return {
+                        ...prevEvent,
+                        reviews: [newReview, ...prevEvent.reviews]
+                    };
+                });
+            } catch (err) {
+                console.error("Error parsing real-time review:", err);
+            }
+        };
+
+        eventSource.onerror = (err) => {
+            console.error("EventSource connection error:", err);
+            eventSource.close();
+        };
+
+        return () => {
+            eventSource.close();
+        };
+    }, [id, !!event]);
 
     const handleRegister = async () => {
         setRegistering(true);
@@ -137,7 +181,16 @@ const EventDetailPage = () => {
         return name.substring(0, 2).toUpperCase();
     };
 
-    const avatarColors = ['bg-[#fca5a5]', '#60a5fa', '#c084fc', '#fcd34d'];
+    const avatarColors = ['#fca5a5', '#60a5fa', '#c084fc', '#fcd34d'];
+
+    // Registration and Rating Computations
+    const isRegistered = event && event.registrations && user && 
+        event.registrations.some(reg => String(reg.user?.id || '') === String(user.id));
+
+    const reviewsCount = event && event.reviews ? event.reviews.length : 0;
+    const avgRating = event && event.reviews && reviewsCount > 0 
+        ? (event.reviews.reduce((sum, r) => sum + r.rating, 0) / reviewsCount).toFixed(1) 
+        : null;
 
     return (
         <div className="min-h-screen bg-[#EBEFEA] font-sans">
@@ -165,6 +218,16 @@ const EventDetailPage = () => {
                             </span>
                             
                             <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-8">{event.title}</h1>
+                            
+                            {avgRating && (
+                                <div className="flex items-center gap-1.5 -mt-6 mb-8 text-slate-700 font-semibold bg-amber-50 px-4 py-2 rounded-2xl w-fit border border-amber-200">
+                                    <svg className="w-5 h-5 text-amber-500 fill-current" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    <span className="text-lg font-bold text-slate-800">{avgRating}</span>
+                                    <span className="text-slate-500 text-sm font-medium">({reviewsCount} đánh giá)</span>
+                                </div>
+                            )}
                             
                             <div className="flex flex-col sm:flex-row gap-6 mb-10">
                                 <div className="flex items-start gap-3">
@@ -217,35 +280,64 @@ const EventDetailPage = () => {
 
                         {/* Comments Card */}
                         <div className="bg-white rounded-3xl shadow-lg p-6 sm:p-10 border border-[#fef3c7]">
-                            <h2 className="text-xl font-bold text-slate-800 mb-4">Bình luận</h2>
-                            
-                            {/* Star Rating Selection */}
-                            <div className="flex gap-2 mb-4">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                    <button key={star} onClick={() => setRating(star)} className="focus:outline-none">
-                                        <svg className={`w-8 h-8 ${rating >= star ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                        </svg>
-                                    </button>
-                                ))}
+                            <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                                <h2 className="text-xl font-bold text-slate-800">Bình luận ({reviewsCount})</h2>
+                                {avgRating && (
+                                    <div className="flex items-center gap-1">
+                                        {[...Array(5)].map((_, i) => (
+                                            <svg key={i} className={`w-4 h-4 ${i < Math.round(Number(avgRating)) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                            </svg>
+                                        ))}
+                                        <span className="text-sm font-bold text-slate-700 ml-1">{avgRating}/5</span>
+                                    </div>
+                                )}
                             </div>
                             
-                            <textarea 
-                                value={comment}
-                                onChange={(e) => setComment(e.target.value)}
-                                placeholder="Nhập bình luận của bạn..."
-                                className="w-full border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#BCE2CD] resize-none mb-4"
-                                rows="3"
-                            ></textarea>
-                            <div className="flex justify-end">
-                                <button 
-                                    onClick={handleSubmitReview}
-                                    disabled={submittingReview}
-                                    className="bg-slate-800 text-white px-6 py-2 rounded-xl hover:bg-slate-700 transition disabled:opacity-50"
-                                >
-                                    {submittingReview ? 'Đang gửi...' : 'Gửi bình luận'}
-                                </button>
-                            </div>
+                            {!token ? (
+                                <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center mb-8">
+                                    <p className="text-slate-600 font-medium mb-3">Vui lòng đăng nhập để bình luận và đánh giá sự kiện.</p>
+                                    <button onClick={() => navigate('/login')} className="bg-slate-800 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-slate-700 transition">Đăng nhập ngay</button>
+                                </div>
+                            ) : !isRegistered ? (
+                                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center mb-8">
+                                    <svg className="w-8 h-8 text-amber-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                    </svg>
+                                    <p className="text-amber-800 font-semibold mb-1">Quyền đánh giá bị giới hạn</p>
+                                    <p className="text-amber-700 text-sm">Bạn cần đăng ký tham gia và được chấp nhận vào sự kiện này trước khi có thể gửi bình luận đánh giá.</p>
+                                </div>
+                            ) : (
+                                <>
+                                    {/* Star Rating Selection */}
+                                    <div className="flex gap-2 mb-4">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button key={star} onClick={() => setRating(star)} className="focus:outline-none">
+                                                <svg className={`w-8 h-8 ${rating >= star ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                </svg>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    
+                                    <textarea 
+                                        value={comment}
+                                        onChange={(e) => setComment(e.target.value)}
+                                        placeholder="Nhập bình luận của bạn..."
+                                        className="w-full border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#BCE2CD] resize-none mb-4"
+                                        rows="3"
+                                    ></textarea>
+                                    <div className="flex justify-end">
+                                        <button 
+                                            onClick={handleSubmitReview}
+                                            disabled={submittingReview}
+                                            className="bg-slate-800 text-white px-6 py-2 rounded-xl hover:bg-slate-700 transition disabled:opacity-50"
+                                        >
+                                            {submittingReview ? 'Đang gửi...' : 'Gửi bình luận'}
+                                        </button>
+                                    </div>
+                                </>
+                            )}
 
                             {/* Existing Comments */}
                             <div className="mt-8 space-y-6">
