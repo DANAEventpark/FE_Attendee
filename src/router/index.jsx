@@ -8,6 +8,7 @@ import CategoryPage from '@/pages/CategoryPage'
 import EventByCategoryPage from '@/pages/EventByCategoryPage'
 import AboutPage from '@/pages/AboutPage'
 import EventDetailPage from '@/pages/EventDetailPage'
+import ProfilePage from '@/pages/ProfilePage'
 
 
 /**
@@ -47,6 +48,10 @@ const router = createBrowserRouter([
       {
         path: '/about',
         element: <AboutPage />
+      },
+      {
+        path: '/profile',
+        element: <ProtectedRoute><ProfilePage /></ProtectedRoute>
       },
       {
         path: '*',

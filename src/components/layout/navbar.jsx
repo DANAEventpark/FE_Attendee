@@ -70,14 +70,14 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-4">
             {user ? (
               <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 select-none">
+                <Link to="/profile" className="flex items-center gap-2 select-none hover:bg-white/10 p-2 rounded-xl transition-colors cursor-pointer">
                   <span className="text-sm font-medium text-white/90">
                     {user.name}
                   </span>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white border border-white/20">
-                    <User size={18} />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white border border-white/20 overflow-hidden">
+                    {user.avatar ? <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" /> : <User size={18} />}
                   </div>
-                </div>
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="rounded-xl bg-[#e96a52] px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#d75c46] hover:shadow-lg flex items-center gap-1.5"
@@ -152,15 +152,15 @@ export default function Navbar() {
             <div className="border-t border-white/10 pt-4">
               {user ? (
                 <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white border border-white/20">
-                      <User size={18} />
+                  <Link to="/profile" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl transition-colors">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white border border-white/20 overflow-hidden">
+                      {user.avatar ? <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" /> : <User size={18} />}
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white/90">{user.name}</p>
                       <p className="text-xs text-white/50">{user.email}</p>
                     </div>
-                  </div>
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full rounded-xl bg-[#e96a52] py-2.5 text-sm font-semibold text-white hover:bg-[#d75c46] transition-colors flex items-center justify-center gap-1.5"
