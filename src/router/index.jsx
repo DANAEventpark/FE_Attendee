@@ -8,7 +8,7 @@ import CategoryPage from '@/pages/CategoryPage'
 import EventByCategoryPage from '@/pages/EventByCategoryPage'
 import AboutPage from '@/pages/AboutPage'
 import EventDetailPage from '@/pages/EventDetailPage'
-
+import DashboardPage from '@/pages/DashboardPage'
 
 /**
  * Router Configuration — FE_Attendee
@@ -47,6 +47,11 @@ const router = createBrowserRouter([
       {
         path: '/about',
         element: <AboutPage />
+      },
+      {
+        // REQ_11 — Attendee Dashboard: lịch sử đăng ký
+        path: '/dashboard',
+        element: <DashboardPage />
       },
       {
         path: '*',
