@@ -32,7 +32,9 @@ const EventDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user, token } = useAuthStore();
+    // const token = useAuthStore((state) => state.token);
     const [event, setEvent] = useState(null);
+    const [userRegistration, setUserRegistration] = useState(null);
     const [loading, setLoading] = useState(true);
     const [comment, setComment] = useState('');
     const [rating, setRating] = useState(0);
@@ -44,9 +46,10 @@ const EventDetailPage = () => {
     useEffect(() => {
         const fetchEvent = async () => {
             try {
-                // Assuming backend is on port 8000
-                const response = await axios.get(`http://localhost:8000/api/events/${id}`);
+                const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+                const response = await axios.get(`http://localhost:8000/api/events/${id}`, config);
                 setEvent(response.data.data);
+                setUserRegistration(response.data.user_registration || null);
             } catch (err) {
                 console.error("Error fetching event details", err);
                 setError(err.response?.data?.message || "Không thể tải dữ liệu sự kiện.");
@@ -54,50 +57,17 @@ const EventDetailPage = () => {
                 setLoading(false);
             }
         };
+
+        // Initial fetch
         fetchEvent();
-    }, [id]);
 
-    useEffect(() => {
-        if (!event) return;
+        // Polling every 3 seconds for real-time updates
+        const intervalId = setInterval(() => {
+            fetchEvent();
+        }, 3000);
 
-        // Use the maximum review ID loaded to only receive new reviews
-        const lastId = event.reviews && event.reviews.length > 0 
-            ? Math.max(...event.reviews.map(r => r.id)) 
-            : 0;
-
-        const eventSource = new EventSource(`http://localhost:8000/api/events/${id}/reviews/stream?last_id=${lastId}`);
-
-        eventSource.onmessage = (e) => {
-            if (e.data === ': heartbeat') return;
-            try {
-                const newReview = JSON.parse(e.data);
-                setEvent((prevEvent) => {
-                    if (!prevEvent) return prevEvent;
-                    
-                    // Double check to prevent any duplicates
-                    const exists = prevEvent.reviews.some(r => r.id === newReview.id);
-                    if (exists) return prevEvent;
-
-                    // Stream always prepends new reviews to show them instantly at the top
-                    return {
-                        ...prevEvent,
-                        reviews: [newReview, ...prevEvent.reviews]
-                    };
-                });
-            } catch (err) {
-                console.error("Error parsing real-time review:", err);
-            }
-        };
-
-        eventSource.onerror = (err) => {
-            console.error("EventSource connection error:", err);
-            eventSource.close();
-        };
-
-        return () => {
-            eventSource.close();
-        };
-    }, [id, !!event]);
+        return () => clearInterval(intervalId);
+    }, [id, token]);
 
     const handleRegister = async () => {
         setRegistering(true);
@@ -107,13 +77,16 @@ const EventDetailPage = () => {
                 setRegistering(false);
                 return;
             }
-            await axios.post(`http://localhost:8000/api/events/${id}/register`, {}, {
+            const response = await axios.post(`http://localhost:8000/api/events/${id}/register`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            alert("Đăng ký thành công!");
+            alert(response.data.message || "Đăng ký thành công!");
             // reload data
-            const res = await axios.get(`http://localhost:8000/api/events/${id}`);
+            const res = await axios.get(`http://localhost:8000/api/events/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setEvent(res.data.data);
+            setUserRegistration(res.data.user_registration || null);
         } catch (error) {
             alert(error.response?.data?.message || "Đã có lỗi xảy ra");
         } finally {
@@ -147,8 +120,11 @@ const EventDetailPage = () => {
             setRating(0);
             
             // reload data
-            const res = await axios.get(`http://localhost:8000/api/events/${id}`);
+            const res = await axios.get(`http://localhost:8000/api/events/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setEvent(res.data.data);
+            setUserRegistration(res.data.user_registration || null);
         } catch (error) {
             alert(error.response?.data?.message || "Đã có lỗi xảy ra");
         } finally {
@@ -368,7 +344,7 @@ const EventDetailPage = () => {
                         <div className="bg-white rounded-3xl shadow-lg p-6 sm:p-8 sticky top-24 border border-[#BCE2CD]">
                             <div className="space-y-4 mb-8">
                                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                                    <span className="text-gray-500 text-sm">Trạng thái:</span>
+                                    <span className="text-gray-500 text-sm">Trạng thái sự kiện:</span>
                                     <span className="text-green-600 font-semibold">{event.status === 'published' ? 'Đang mở đăng ký' : 'Chưa mở'}</span>
                                 </div>
                                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
@@ -379,19 +355,57 @@ const EventDetailPage = () => {
                                     <span className="text-gray-500 text-sm">Hạn đăng ký:</span>
                                     <span className="text-slate-800 font-medium text-sm">{formatDate(deadlineDate)}</span>
                                 </div>
+                                {userRegistration && (
+                                    <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-2">
+                                        <span className="text-gray-500 text-sm">Đăng ký của bạn:</span>
+                                        {userRegistration.status === 'approved' && (
+                                            <span className="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-200">
+                                                Chính thức
+                                            </span>
+                                        )}
+                                        {userRegistration.status === 'pending' && (
+                                            <span className="bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-200">
+                                                Đang chờ duyệt
+                                            </span>
+                                        )}
+                                        {userRegistration.status === 'cancelled' && (
+                                            <span className="bg-rose-100 text-rose-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-rose-200">
+                                                Đã hủy
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             
-                            <button 
-                                onClick={handleRegister}
-                                disabled={registering || remainingSpots <= 0}
-                                className={`w-full py-4 rounded-xl font-semibold text-lg transition ${
-                                    remainingSpots <= 0 
-                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                    : 'bg-[#BCE2CD] text-slate-800 hover:bg-[#a6d1b8]'
-                                }`}
-                            >
-                                {registering ? 'Đang xử lý...' : (remainingSpots > 0 ? 'Đăng ký tham gia' : 'Đã hết chỗ')}
-                            </button>
+                            {userRegistration ? (
+                                <button 
+                                    disabled={true}
+                                    className="w-full py-4 rounded-xl font-semibold text-lg bg-gray-200 text-gray-500 cursor-not-allowed"
+                                >
+                                    {userRegistration.status === 'approved' && 'Đã đăng ký chính thức'}
+                                    {userRegistration.status === 'pending' && 'Đang ở hàng chờ'}
+                                    {userRegistration.status === 'cancelled' && 'Đăng ký đã bị hủy'}
+                                </button>
+                            ) : (
+                                <button 
+                                    onClick={handleRegister}
+                                    disabled={registering || (new Date() > deadlineDate)}
+                                    className={`w-full py-4 rounded-xl font-semibold text-lg transition ${
+                                        new Date() > deadlineDate
+                                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                        : remainingSpots <= 0 
+                                          ? 'bg-[#F05A4A] text-white hover:bg-[#d84e3f]'
+                                          : 'bg-[#BCE2CD] text-slate-800 hover:bg-[#a6d1b8]'
+                                    }`}
+                                >
+                                    {registering 
+                                        ? 'Đang xử lý...' 
+                                        : (new Date() > deadlineDate)
+                                          ? 'Hết hạn đăng ký'
+                                          : (remainingSpots > 0 ? 'Đăng ký tham gia' : 'Đăng ký vào hàng chờ')
+                                    }
+                                </button>
+                            )}
                         </div>
                     </div>
                     
