@@ -102,7 +102,6 @@ const EventDetailPage = () => {
     const handleRegister = async () => {
         setRegistering(true);
         try {
-            const token = localStorage.getItem('token');
             if (!token) {
                 alert("Vui lòng đăng nhập để đăng ký tham gia!");
                 setRegistering(false);
@@ -130,7 +129,6 @@ const EventDetailPage = () => {
         
         setSubmittingReview(true);
         try {
-            const token = localStorage.getItem('token');
             if (!token) {
                 alert("Vui lòng đăng nhập để bình luận!");
                 setSubmittingReview(false);
