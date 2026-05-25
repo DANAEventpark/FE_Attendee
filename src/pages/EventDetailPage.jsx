@@ -44,7 +44,12 @@ const EventDetailPage = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
+        let intervalId = null;
+        let isFetching = false;
+
         const fetchEvent = async () => {
+            if (isFetching) return;
+            isFetching = true;
             try {
                 const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
                 const response = await axios.get(`http://localhost:8000/api/events/${id}`, config);
@@ -55,18 +60,47 @@ const EventDetailPage = () => {
                 setError(err.response?.data?.message || "Không thể tải dữ liệu sự kiện.");
             } finally {
                 setLoading(false);
+                isFetching = false;
             }
         };
 
-        // Initial fetch
-        fetchEvent();
+        const startPolling = () => {
+            stopPolling();
+            intervalId = setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    fetchEvent();
+                }
+            }, 3000);
+        };
 
-        // Polling every 3 seconds for real-time updates
-        const intervalId = setInterval(() => {
+        const stopPolling = () => {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        };
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') {
+                fetchEvent();
+                startPolling();
+            } else {
+                stopPolling();
+            }
+        };
+
+        // Initial fetch only when page is visible
+        if (document.visibilityState === 'visible') {
             fetchEvent();
-        }, 3000);
+            startPolling();
+        }
 
-        return () => clearInterval(intervalId);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            stopPolling();
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
     }, [id, token]);
 
     const handleRegister = async () => {
