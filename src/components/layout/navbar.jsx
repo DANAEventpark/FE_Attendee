@@ -2,7 +2,7 @@ import { useState } from "react";
 import logo from "../../assets/logoevent.png";
 import useAuthStore from "@/store/authStore";
 import { useNavigate, Link } from "react-router-dom";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard } from "lucide-react";
 import RoleSelectionModal from "../common/RoleSelectionModal";
 
 export default function Navbar() {
@@ -12,6 +12,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authActionType, setAuthActionType] = useState('login');
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
 
   const openAuthModal = (type) => {
     setAuthActionType(type);
@@ -69,22 +70,47 @@ export default function Navbar() {
           {/* Desktop User Section */}
           <div className="hidden md:flex items-center gap-4">
             {user ? (
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 select-none">
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  className="flex items-center gap-2 select-none focus:outline-none hover:opacity-80 transition-opacity"
+                >
                   <span className="text-sm font-medium text-white/90">
                     {user.name}
                   </span>
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white border border-white/20">
                     <User size={18} />
                   </div>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="rounded-xl bg-[#e96a52] px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#d75c46] hover:shadow-lg flex items-center gap-1.5"
-                >
-                  <LogOut size={16} />
-                  Đăng xuất
                 </button>
+
+                {showUserDropdown && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setShowUserDropdown(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[#173846] border border-white/10 shadow-xl py-1.5 z-20 text-sm animate-in fade-in-50 slide-in-from-top-2 duration-150">
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setShowUserDropdown(false)}
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-white/10 transition-colors text-white"
+                      >
+                        <LayoutDashboard size={15} />
+                        Dashboard
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          handleLogout();
+                        }}
+                        className="w-full flex items-center gap-2 px-4 py-2 hover:bg-white/10 transition-colors text-[#e96a52] text-left font-medium"
+                      >
+                        <LogOut size={15} />
+                        Đăng xuất
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               <div className="flex items-center gap-3">
@@ -146,6 +172,18 @@ export default function Navbar() {
                   Về chúng tôi
                 </Link>
               </li>
+              {user && (
+                <li>
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-1.5 py-2 text-[#e96a52] hover:text-[#d75c46] transition-colors font-semibold"
+                  >
+                    <LayoutDashboard size={15} />
+                    Dashboard
+                  </Link>
+                </li>
+              )}
             </ul>
 
             {/* Mobile User Section */}
