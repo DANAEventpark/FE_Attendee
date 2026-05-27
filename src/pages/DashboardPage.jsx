@@ -1,18 +1,18 @@
 import { useState, useEffect, useDeferredValue } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronRight, Search, SlidersHorizontal, Calendar, CheckCircle2, Clock4, XCircle, ChevronLeft, ChevronRight as ChevronRightIcon, Inbox } from 'lucide-react'
+import { ChevronRight, Search, Calendar, CheckCircle2, Clock4, XCircle, ChevronLeft, ChevronRight as ChevronRightIcon, Inbox } from 'lucide-react'
 
 import useAuthStore from '@/store/authStore'
 import {
   getDashboardStats,
   getRegistrations,
+  getDoneRegistrations,
   getWaitlist,
   getCancelledRegistrations,
 } from '@/services/registrationService'
 import { getCategories } from '@/services/categoryService'
 
 import RegistrationCard from '@/components/dashboard/RegistrationCard'
-import EventDetailModal from '@/components/dashboard/EventDetailModal'
 
 /**
  * DashboardPage — REQ_11
@@ -22,7 +22,8 @@ import EventDetailModal from '@/components/dashboard/EventDetailModal'
  */
 
 const TABS = [
-  { key: 'registered', label: 'Sự kiện đã đăng ký', statKey: 'registered' },
+  { key: 'registered', label: 'Sắp diễn ra',            statKey: 'registered' },
+  { key: 'done',       label: 'Đã tham gia',           statKey: 'done'       },
   { key: 'waitlist',   label: 'Waitlist',             statKey: 'waitlist'   },
   { key: 'cancelled',  label: 'Đã huỷ',               statKey: 'cancelled'  },
 ]
@@ -39,7 +40,7 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('registered')
 
   // ── State: thống kê ─────────────────────────────────────────────────────
-  const [stats, setStats] = useState({ registered: 0, waitlist: 0, cancelled: 0 })
+  const [stats, setStats] = useState({ registered: 0, done: 0, waitlist: 0, cancelled: 0 })
   const [statsLoading, setStatsLoading] = useState(true)
 
   // ── State: bộ lọc ────────────────────────────────────────────────────────
@@ -56,9 +57,7 @@ export default function DashboardPage() {
   const [page, setPage]                   = useState(1)
   const [pagination, setPagination]       = useState({ currentPage: 1, lastPage: 1, total: 0 })
 
-  // ── State: modal chi tiết ──────────────────────────────────────────────────
-  const [selectedRegistration, setSelectedRegistration] = useState(null)
-  const [isModalOpen, setIsModalOpen]                   = useState(false)
+  // ── State: modal chi tiết đã được thay thế bằng chuyển hướng sang trang chi tiết ──
 
   // ── Guard: chưa đăng nhập → redirect ───────────────────────────────────
   useEffect(() => {
@@ -99,6 +98,7 @@ export default function DashboardPage() {
 
     const fetcher =
       activeTab === 'registered' ? getRegistrations :
+      activeTab === 'done'       ? getDoneRegistrations :
       activeTab === 'waitlist'   ? getWaitlist      :
                                    getCancelledRegistrations
 
@@ -123,8 +123,6 @@ export default function DashboardPage() {
   }, [activeTab, page, deferredSearch, categoryId, year, user])
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const openModal = (reg) => { setSelectedRegistration(reg); setIsModalOpen(true) }
-  const closeModal = () => { setIsModalOpen(false); setSelectedRegistration(null) }
 
   const handlePageChange = (newPage) => {
     if (newPage < 1 || newPage > pagination.lastPage) return
@@ -135,11 +133,18 @@ export default function DashboardPage() {
   // ── Stat cards config ──────────────────────────────────────────────────────
   const STAT_CARDS = [
     {
-      label:   'Đã tham dự',
+      label:   'Sắp diễn ra',
       value:   stats.registered,
-      icon:    <CheckCircle2 size={20} />,
+      icon:    <Calendar size={20} />,
       color:   'text-[#e96a52]',
       iconBg:  'bg-[#e96a52]/10 text-[#e96a52]',
+    },
+    {
+      label:   'Đã tham gia',
+      value:   stats.done,
+      icon:    <CheckCircle2 size={20} />,
+      color:   'text-emerald-500',
+      iconBg:  'bg-emerald-50 text-emerald-500',
     },
     {
       label:   'Đang chờ',
@@ -313,7 +318,8 @@ export default function DashboardPage() {
             </div>
             <p className="text-lg font-bold text-slate-700 mb-1">Chưa có sự kiện nào</p>
             <p className="text-sm text-slate-500 max-w-xs">
-              {activeTab === 'registered' && 'Bạn chưa đăng ký sự kiện nào. Khám phá các sự kiện hấp dẫn ngay!'}
+              {activeTab === 'registered' && 'Bạn chưa có sự kiện nào sắp diễn ra. Khám phá ngay!'}
+              {activeTab === 'done'       && 'Bạn chưa tham gia sự kiện nào đã hoàn thành.'}
               {activeTab === 'waitlist'   && 'Bạn không có sự kiện nào trong danh sách chờ.'}
               {activeTab === 'cancelled'  && 'Bạn chưa huỷ đăng ký sự kiện nào.'}
             </p>
@@ -333,7 +339,6 @@ export default function DashboardPage() {
                 key={reg.id}
                 registration={reg}
                 tab={activeTab}
-                onViewDetail={openModal}
               />
             ))}
           </div>
@@ -389,13 +394,7 @@ export default function DashboardPage() {
         )}
       </main>
 
-      {/* ── Event Detail Modal ────────────────────────────────────────────── */}
-      <EventDetailModal
-        registration={selectedRegistration}
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        tab={activeTab}
-      />
+      {/* EventDetailModal đã được xoá do sử dụng link trực tiếp */}
     </div>
   )
 }

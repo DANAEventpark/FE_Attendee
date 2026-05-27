@@ -26,6 +26,15 @@ export const getRegistrations = async (params = {}) => {
 }
 
 /**
+ * Lấy danh sách sự kiện đã tham gia (đã kết thúc)
+ * GET /api/attendee/dashboard/done
+ */
+export const getDoneRegistrations = async (params = {}) => {
+  const response = await client.get('/attendee/dashboard/done', { params })
+  return response.data
+}
+
+/**
  * Lấy danh sách đang chờ (registration.status = pending)
  * GET /api/attendee/dashboard/waitlist
  * @param {Object} params - { page, search, category_id, year }

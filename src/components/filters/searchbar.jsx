@@ -29,6 +29,8 @@ const SearchBar = ({ value, onChange, timeFilter, onTimeFilterChange }) => {
           <option value="today">Hôm nay</option>
           <option value="this_week">Tuần này</option>
           <option value="this_month">Tháng này</option>
+          <option value="next_month">Tháng sau</option>
+          <option value="past">Đã kết thúc</option>
         </select>
       </div>
 

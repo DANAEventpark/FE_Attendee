@@ -1,4 +1,4 @@
-import { Calendar, Clock, MapPin, AlertTriangle, Loader2, Users } from 'lucide-react'
+import { Calendar, Clock, MapPin, AlertTriangle } from 'lucide-react'
 import artImg from '@/assets/art.jpg'
 import communityImg from '@/assets/community.jpg'
 import educationImg from '@/assets/education.jpg'
@@ -12,8 +12,8 @@ import heroFallback from '@/assets/hero.png'
  * Thẻ sự kiện dạng ngang (horizontal) dùng trong Attendee Dashboard.
  * Props:
  *   - registration: object Registration (bao gồm event đã eager load)
+ *   - registration: object Registration (bao gồm event đã eager load)
  *   - tab: 'registered' | 'waitlist' | 'cancelled'
- *   - onViewDetail: function(registration) — mở modal chi tiết
  */
 
 // Map tên file ảnh từ DB sang asset đã import
@@ -50,7 +50,9 @@ const formatTime = (dateStr) => {
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
-export default function RegistrationCard({ registration, tab, onViewDetail }) {
+import { Link } from 'react-router-dom'
+
+export default function RegistrationCard({ registration, tab }) {
   const event = registration?.event
   if (!event) return null
 
@@ -97,6 +99,11 @@ export default function RegistrationCard({ registration, tab, onViewDetail }) {
                   Sắp diễn ra
                 </span>
               )
+            )}
+            {tab === 'done' && (
+              <span className="inline-flex items-center gap-1 rounded bg-blue-50 px-2 py-0.5 text-[11px] font-bold text-blue-600 border border-blue-200">
+                Đã hoàn thành
+              </span>
             )}
             {tab === 'waitlist' && (
               <span className="inline-flex items-center gap-1 rounded bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-[#C0442B] border border-amber-200">
@@ -147,15 +154,13 @@ export default function RegistrationCard({ registration, tab, onViewDetail }) {
           )}
         </div>
 
-        {/* Nút Xem chi tiết */}
         <div className="mt-4 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => onViewDetail(registration)}
-            className="rounded bg-[#C0442B] px-5 py-2 text-xs sm:text-sm font-bold text-white hover:bg-[#A83821] active:scale-[0.97] transition-all duration-200 shadow-sm"
+          <Link
+            to={`/events/${event.id}`}
+            className="rounded bg-[#C0442B] px-5 py-2 text-xs sm:text-sm font-bold text-white hover:bg-[#A83821] active:scale-[0.97] transition-all duration-200 shadow-sm inline-block"
           >
             Xem chi tiết
-          </button>
+          </Link>
         </div>
       </div>
     </article>
