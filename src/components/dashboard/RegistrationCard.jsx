@@ -90,11 +90,11 @@ export default function RegistrationCard({ registration, tab, onViewDetail }) {
             {tab === 'registered' && (
               isEventCancelled ? (
                 <span className="inline-flex items-center gap-1 rounded bg-red-50 px-2 py-0.5 text-[11px] font-bold text-red-600 border border-red-200">
-                  Đã huỷ
+                  Canceled
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-200">
-                  Sắp diễn ra
+                  Coming soon
                 </span>
               )
             )}
