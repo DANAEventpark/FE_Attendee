@@ -84,6 +84,30 @@ const EventDetailPage = () => {
         }
     };
 
+    const handleCancel = async () => {
+        if (!token) return;
+        const confirmCancel = window.confirm("Bạn có chắc chắn muốn hủy đăng ký tham gia sự kiện này không?");
+        if (!confirmCancel) return;
+
+        setRegistering(true);
+        try {
+            const response = await axios.post(`http://localhost:8000/api/events/${id}/cancel`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert(response.data.message || "Hủy đăng ký thành công!");
+            // reload data
+            const res = await axios.get(`http://localhost:8000/api/events/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setEvent(res.data.data);
+            setUserRegistration(res.data.user_registration || null);
+        } catch (error) {
+            alert(error.response?.data?.message || "Đã có lỗi xảy ra");
+        } finally {
+            setRegistering(false);
+        }
+    };
+
     const handleSubmitReview = async () => {
         if (rating === 0 || !comment.trim()) {
             alert("Vui lòng chọn số sao và nhập nội dung bình luận!");
@@ -133,6 +157,7 @@ const EventDetailPage = () => {
     const deadlineDate = new Date(event.registration_deadline);
     const formatDate = (date) => `${date.getDate()} tháng ${date.getMonth() + 1}, ${date.getFullYear()}`;
     const formatTime = (date) => `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    const isCancellable = startDate.getTime() - Date.now() > 24 * 60 * 60 * 1000;
     
     const registeredCount = event.registrations ? event.registrations.length : 0;
     const remainingSpots = event.capacity - registeredCount;
@@ -320,14 +345,25 @@ const EventDetailPage = () => {
                             </div>
                             
                             {userRegistration ? (
-                                <button 
-                                    disabled={true}
-                                    className="w-full py-4 rounded-xl font-semibold text-lg bg-gray-200 text-gray-500 cursor-not-allowed"
-                                >
-                                    {userRegistration.status === 'approved' && 'Đã đăng ký chính thức'}
-                                    {userRegistration.status === 'pending' && 'Đang ở hàng chờ'}
-                                    {userRegistration.status === 'cancelled' && 'Đăng ký đã bị hủy'}
-                                </button>
+                                <div className="space-y-3">
+                                    <button 
+                                        disabled={true}
+                                        className="w-full py-4 rounded-xl font-semibold text-lg bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    >
+                                        {userRegistration.status === 'approved' && 'Đã đăng ký chính thức'}
+                                        {userRegistration.status === 'pending' && 'Đang ở hàng chờ'}
+                                        {userRegistration.status === 'cancelled' && 'Đăng ký đã bị hủy'}
+                                    </button>
+                                    {userRegistration.status !== 'cancelled' && isCancellable && (
+                                        <button 
+                                            onClick={handleCancel}
+                                            disabled={registering}
+                                            className="w-full py-3 rounded-xl font-semibold text-md border-2 border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center gap-2"
+                                        >
+                                            {registering ? 'Đang xử lý...' : 'Hủy đăng ký'}
+                                        </button>
+                                    )}
+                                </div>
                             ) : (
                                 <button 
                                     onClick={handleRegister}
