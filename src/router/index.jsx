@@ -9,6 +9,7 @@ import EventByCategoryPage from '@/pages/EventByCategoryPage'
 import AboutPage from '@/pages/AboutPage'
 import EventDetailPage from '@/pages/EventDetailPage'
 import DashboardPage from '@/pages/DashboardPage'
+import ProfilePage from '@/pages/ProfilePage'
 
 /**
  * Router Configuration — FE_Attendee
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
         // REQ_11 — Attendee Dashboard: lịch sử đăng ký
         path: '/dashboard',
         element: <DashboardPage />
+      },
+      {
+        path: '/profile',
+        element: <ProtectedRoute><ProfilePage /></ProtectedRoute>
       },
       {
         path: '*',
