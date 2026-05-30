@@ -173,10 +173,16 @@ const EventDetailPage = () => {
     const bannerImg = event.category ? getCategoryImage(event.category.image) : musicImg;
     const catName = event.category ? event.category.name : 'Sự kiện';
     
-    const startDate = new Date(event.start_time);
-    const deadlineDate = new Date(event.registration_deadline);
-    const formatDate = (date) => `${date.getDate()} tháng ${date.getMonth() + 1}, ${date.getFullYear()}`;
-    const formatTime = (date) => `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    const startDate = new Date(typeof event.start_time === 'string' ? event.start_time.replace(/-/g, '/') : event.start_time);
+    const deadlineDate = new Date(typeof event.registration_deadline === 'string' ? event.registration_deadline.replace(/-/g, '/') : event.registration_deadline);
+    const formatDate = (date) => {
+        if (Number.isNaN(date.getTime())) return 'N/A';
+        return `${date.getDate()} tháng ${date.getMonth() + 1}, ${date.getFullYear()}`;
+    };
+    const formatTime = (date) => {
+        if (Number.isNaN(date.getTime())) return 'N/A';
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    };
     
     const registeredCount = event.registrations ? event.registrations.length : 0;
     const remainingSpots = event.capacity - registeredCount;

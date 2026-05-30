@@ -37,15 +37,15 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('vi-VN', {
 
 function formatDate(dateValue) {
   if (!dateValue) return 'Đang cập nhật'
-  const date = new Date(dateValue)
+  const date = new Date(typeof dateValue === 'string' ? dateValue.replace(/-/g, '/') : dateValue)
   if (Number.isNaN(date.getTime())) return 'Đang cập nhật'
   return DATE_FORMATTER.format(date)
 }
 
 function formatDateRange(startTime, endTime) {
   if (!startTime) return 'Đang cập nhật lịch trình'
-  const start = new Date(startTime)
-  const end = endTime ? new Date(endTime) : null
+  const start = new Date(typeof startTime === 'string' ? startTime.replace(/-/g, '/') : startTime)
+  const end = endTime ? new Date(typeof endTime === 'string' ? endTime.replace(/-/g, '/') : endTime) : null
   if (Number.isNaN(start.getTime())) return 'Đang cập nhật lịch trình'
 
   const startLabel = DATE_FORMATTER.format(start)
