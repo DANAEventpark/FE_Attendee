@@ -215,8 +215,10 @@ const EventDetailPage = () => {
         startDate.getMonth() === endDate.getMonth() &&
         startDate.getDate() === endDate.getDate();
 
-    const isCancellable = startDate && !Number.isNaN(startDate.getTime()) 
-        ? startDate.getTime() - Date.now() > 24 * 60 * 60 * 1000 
+    const isEnded = endDate && !Number.isNaN(endDate.getTime()) ? Date.now() > endDate.getTime() : false;
+
+    const isCancellable = deadlineDate && !Number.isNaN(deadlineDate.getTime()) 
+        ? Date.now() < deadlineDate.getTime()
         : false;
     
     const registeredCount = event.registrations ? event.registrations.length : 0;
@@ -366,6 +368,14 @@ const EventDetailPage = () => {
                                     </svg>
                                     <p className="text-amber-800 font-semibold mb-1">Quyền đánh giá bị giới hạn</p>
                                     <p className="text-amber-700 text-sm">Bạn cần đăng ký tham gia và được chấp nhận vào sự kiện này trước khi có thể gửi bình luận đánh giá.</p>
+                                </div>
+                            ) : !isEnded ? (
+                                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 text-center mb-8">
+                                    <svg className="w-8 h-8 text-blue-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p className="text-blue-800 font-semibold mb-1">Sự kiện chưa kết thúc</p>
+                                    <p className="text-blue-700 text-sm">Bạn chỉ có thể gửi đánh giá và bình luận sau khi sự kiện này đã chính thức kết thúc.</p>
                                 </div>
                             ) : (
                                 <>

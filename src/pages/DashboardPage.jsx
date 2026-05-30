@@ -395,6 +395,10 @@ export default function DashboardPage() {
         isOpen={isModalOpen}
         onClose={closeModal}
         tab={activeTab}
+        onCancelSuccess={() => {
+          setPage(1)
+          getDashboardStats().then(res => { if(res.success) setStats(res.data) }).catch(()=>{})
+        }}
       />
     </div>
   )

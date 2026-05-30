@@ -44,3 +44,12 @@ export const getCancelledRegistrations = async (params = {}) => {
   const response = await client.get('/attendee/dashboard/cancelled', { params })
   return response.data
 }
+
+/**
+ * Huỷ đăng ký tham gia sự kiện
+ * POST /api/events/{id}/cancel
+ */
+export const cancelRegistration = async (eventId) => {
+  const response = await client.post(`/events/${eventId}/cancel`)
+  return response.data
+}

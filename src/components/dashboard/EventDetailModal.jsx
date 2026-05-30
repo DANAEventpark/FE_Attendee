@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Calendar, Clock, MapPin, AlertTriangle, Users, Tag, User } from 'lucide-react'
+import { cancelRegistration } from '@/services/registrationService'
 import artImg from '@/assets/art.jpg'
 import communityImg from '@/assets/community.jpg'
 import educationImg from '@/assets/education.jpg'
@@ -57,7 +59,8 @@ const REGISTRATION_STATUS_MAP = {
   cancelled: { label: 'Đã huỷ đăng ký', color: 'bg-slate-100 text-slate-600 border-slate-200' },
 }
 
-export default function EventDetailModal({ registration, isOpen, onClose, tab }) {
+export default function EventDetailModal({ registration, isOpen, onClose, tab, onCancelSuccess }) {
+  const [cancelling, setCancelling] = useState(false)
   if (!isOpen || !registration) return null
 
   const event = registration.event
@@ -76,6 +79,24 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab })
   const registeredAt  = registration.created_at
     ? new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(registration.created_at))
     : 'Không rõ'
+
+  const deadlineDate = event.registration_deadline ? new Date(typeof event.registration_deadline === 'string' ? event.registration_deadline.replace(/-/g, '/') : event.registration_deadline) : null;
+  const isCancellable = deadlineDate && !Number.isNaN(deadlineDate.getTime()) ? Date.now() < deadlineDate.getTime() : false;
+
+  const handleCancel = async () => {
+    if (!confirm('Bạn có chắc chắn muốn huỷ đăng ký sự kiện này?')) return;
+    setCancelling(true);
+    try {
+      await cancelRegistration(event.id);
+      alert('Hủy đăng ký thành công!');
+      onClose();
+      if (onCancelSuccess) onCancelSuccess();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Có lỗi xảy ra khi huỷ đăng ký');
+    } finally {
+      setCancelling(false);
+    }
+  }
 
   return createPortal(
     <div
@@ -207,13 +228,24 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab })
             )}
           </div>
 
-          {/* Nút đóng */}
-          <button
-            onClick={onClose}
-            className="w-full rounded-2xl bg-slate-100 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-colors"
-          >
-            Đóng
-          </button>
+          {/* Nút đóng & huỷ */}
+          <div className="flex gap-3">
+            {isCancellable && (registration.status === 'approved' || registration.status === 'pending') && (
+              <button
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="w-full rounded-2xl bg-rose-50 border border-rose-200 py-3 text-sm font-semibold text-rose-600 hover:bg-rose-100 transition-colors disabled:opacity-50"
+              >
+                {cancelling ? 'Đang huỷ...' : 'Huỷ đăng ký'}
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="w-full rounded-2xl bg-slate-100 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-colors"
+            >
+              Đóng
+            </button>
+          </div>
         </div>
       </div>
     </div>,
