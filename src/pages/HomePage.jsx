@@ -1,11 +1,12 @@
 import { useDeferredValue, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next';
 
 
 
-import Hero from '@/components/hero/Hero'
+import Hero from '@/components/hero/hero'
 
-import SearchBar from '@/components/filters/SearchBar'
-import CategoriesList from '@/components/filters/CategoriesList'
+import SearchBar from '@/components/filters/searchbar'
+import CategoriesList from '@/components/filters/categoriesList'
 
 import EventResults from '@/components/events/EventResults'
 
@@ -14,6 +15,7 @@ import { getCategories } from '@/services/categoryService'
 import { getSystemStats } from '@/services/eventService'
 
 export default function HomePage() {
+  const { t } = useTranslation();
 
   const [categories, setCategories] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -122,15 +124,15 @@ export default function HomePage() {
           <div>
 
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[#e96a52]">
-              Event feed
+              {t('home.event_feed')}
             </p>
 
             <h2 className="mt-2 text-3xl font-bold text-slate-900">
-              Các sự kiện nổi bật
+              {t('home.featured_events')}
             </h2>
             {searchTerm && (
               <p className="mt-3 text-sm text-slate-500">
-                Kết quả tìm kiếm cho:
+                {t('home.search_results_for')}
                 <span className="ml-1 font-semibold text-[#e96a52]">
                   "{searchTerm}"
                 </span>
@@ -140,7 +142,7 @@ export default function HomePage() {
 
           <div className="rounded-2xl bg-white px-5 py-4 text-sm text-slate-500 shadow-sm">
 
-            Trang {pagination.currentPage} / {pagination.lastPage}
+            {t('home.page_of', { current: pagination.currentPage, total: pagination.lastPage })}
 
           </div>
 

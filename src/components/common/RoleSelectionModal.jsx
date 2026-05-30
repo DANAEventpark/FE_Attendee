@@ -1,12 +1,18 @@
 import { X } from "lucide-react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
 export default function RoleSelectionModal({ isOpen, onClose, actionType }) {
+  const { t } = useTranslation();
+
   if (!isOpen) return null;
 
-const attendeeUrl = actionType === "register" ? "http://localhost:5173/register" : "http://localhost:5173/login";
-const organizerUrl = actionType === "register" ? "http://localhost:5174/register" : "http://localhost:5174/login";
-  const title = actionType === "register" ? "Bạn muốn đăng ký với vai trò nào?" : "Bạn muốn đăng nhập với vai trò nào?";
+  const attendeeUrl = actionType === "register" ? "http://localhost:5173/register" : "http://localhost:5173/login";
+  const organizerUrl = actionType === "register" ? "http://localhost:5174/register" : "http://localhost:5174/login";
+  
+  const title = actionType === "register" 
+    ? t('role_selection.title_register', "Bạn muốn đăng ký với vai trò nào?") 
+    : t('role_selection.title_login', "Bạn muốn đăng nhập với vai trò nào?");
 
   return createPortal(
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
@@ -18,7 +24,7 @@ const organizerUrl = actionType === "register" ? "http://localhost:5174/register
         >
           <X size={20} />
         </button>
-
+ 
         {/* Title */}
         <h2 className="text-center text-xl font-semibold text-gray-800 mb-8">
           {title}
@@ -30,13 +36,13 @@ const organizerUrl = actionType === "register" ? "http://localhost:5174/register
             href={attendeeUrl}
             className="flex-1 rounded-xl bg-[#e96a52] px-6 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-orange-500/20 hover:bg-[#d75c46] hover:scale-105 transition-all duration-200"
           >
-            Người tham gia
+            {t('role_selection.attendee', 'Người tham gia')}
           </a>
           <a
             href={organizerUrl}
             className="flex-1 rounded-xl bg-[#e96a52] px-6 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-orange-500/20 hover:bg-[#d75c46] hover:scale-105 transition-all duration-200"
           >
-            Ban tổ chức
+            {t('role_selection.organizer', 'Ban tổ chức')}
           </a>
         </div>
       </div>

@@ -1,8 +1,9 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import logo from "../../assets/logoevent.png";
 import useAuthStore from "@/store/authStore";
 import { useNavigate, Link } from "react-router-dom";
-import { Menu, X, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, User, LogOut, LayoutDashboard, Languages } from "lucide-react";
 import RoleSelectionModal from "../common/RoleSelectionModal";
 
 export default function Navbar() {
@@ -27,6 +28,14 @@ export default function Navbar() {
     setIsOpen(false);
   };
 
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language.toUpperCase();
+
+  const toggleLanguage = () => {
+    const nextLang = currentLang.startsWith("VI") ? "en" : "vi";
+    i18n.changeLanguage(nextLang);
+    localStorage.setItem('i18nextLng', nextLang);
+  };
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#173846] text-white shadow-md backdrop-blur-md">
       <nav className="mx-auto max-w-6xl px-4 py-3 sm:px-6 lg:px-8">
@@ -43,7 +52,7 @@ export default function Navbar() {
             <div>
               <p className="text-base font-semibold leading-none">DANAEventSpark</p>
               <p className="mt-1 text-[10px] text-white/60 hidden sm:block">
-                Khám phá sự kiện trong cộng đồng
+                {t('home.explore_community')}
               </p>
             </div>
           </Link>
@@ -52,23 +61,31 @@ export default function Navbar() {
           <ul className="hidden md:flex items-center gap-8 text-sm font-medium text-white/80">
             <li>
               <Link to="/" className="hover:text-white transition-colors">
-                Sự kiện
+                {t('navbar.events')}
               </Link>
             </li>
             <li>
               <Link to="/categories" className="hover:text-white transition-colors">
-                Danh mục
+                {t('navbar.categories')}
               </Link>
             </li>
             <li>
               <Link to="/about" className="hover:text-white transition-colors">
-                Về chúng tôi
+                {t('navbar.about')}
               </Link>
             </li>
           </ul>
 
           {/* Desktop User Section */}
           <div className="hidden md:flex items-center gap-4">
+            {/* NÚT CHUYỂN ĐỔI NGÔN NGỮ Ở ĐÂY */}
+              <button
+                onClick={toggleLanguage}
+                className="flex items-center gap-1.5 rounded-xl bg-white/5 border border-white/10 px-3 py-1.5 text-xs font-semibold text-white/90 hover:bg-white/10 hover:text-white transition-colors active:scale-95"
+              >
+                <Languages size={15} />
+                <span>{currentLang}</span>
+              </button>
             {user ? (
               <div className="relative">
                 <button
@@ -96,7 +113,7 @@ export default function Navbar() {
                         className="flex items-center gap-2 px-4 py-2 hover:bg-white/10 transition-colors text-white"
                       >
                         <LayoutDashboard size={15} />
-                        Dashboard
+                        {t('navbar.dashboard')}
                       </Link>
                       <button
                         onClick={() => {
@@ -106,7 +123,7 @@ export default function Navbar() {
                         className="w-full flex items-center gap-2 px-4 py-2 hover:bg-white/10 transition-colors text-[#e96a52] text-left font-medium"
                       >
                         <LogOut size={15} />
-                        Đăng xuất
+                        {t('navbar.logout')}
                       </button>
                     </div>
                   </>
@@ -118,13 +135,13 @@ export default function Navbar() {
                   onClick={() => openAuthModal('login')}
                   className="rounded-xl bg-white/10 border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 transition-colors"
                 >
-                  Đăng nhập
+                  {t('navbar.login')}
                 </button>
                 <button
                   onClick={() => openAuthModal('register')}
                   className="rounded-xl bg-[#e96a52] px-4 py-2 text-sm font-semibold text-white hover:bg-[#d75c46] transition-colors shadow-lg shadow-orange-500/20"
                 >
-                  Đăng ký
+                  {t('navbar.register')}
                 </button>
               </div>
             )}
@@ -151,7 +168,7 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                   className="block py-2 hover:text-white transition-colors"
                 >
-                  Sự kiện
+                  {t('navbar.events')}
                 </Link>
               </li>
               <li>
@@ -160,7 +177,7 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                   className="block py-2 hover:text-white transition-colors"
                 >
-                  Danh mục
+                  {t('navbar.categories')}
                 </Link>
               </li>
               <li>
@@ -169,18 +186,18 @@ export default function Navbar() {
                   onClick={() => setIsOpen(false)}
                   className="block py-2 hover:text-white transition-colors"
                 >
-                  Về chúng tôi
+                  {t('navbar.about')}
                 </Link>
               </li>
               {user && (
                 <li>
                   <Link
-                    to="/dashboard"
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-1.5 py-2 text-[#e96a52] hover:text-[#d75c46] transition-colors font-semibold"
+                     to="/dashboard"
+                     onClick={() => setIsOpen(false)}
+                     className="flex items-center gap-1.5 py-2 text-[#e96a52] hover:text-[#d75c46] transition-colors font-semibold"
                   >
                     <LayoutDashboard size={15} />
-                    Dashboard
+                    {t('navbar.dashboard')}
                   </Link>
                 </li>
               )}
@@ -204,7 +221,7 @@ export default function Navbar() {
                     className="w-full rounded-xl bg-[#e96a52] py-2.5 text-sm font-semibold text-white hover:bg-[#d75c46] transition-colors flex items-center justify-center gap-1.5"
                   >
                     <LogOut size={16} />
-                    Đăng xuất
+                    {t('navbar.logout')}
                   </button>
                 </div>
               ) : (
@@ -213,13 +230,13 @@ export default function Navbar() {
                     onClick={() => openAuthModal('login')}
                     className="rounded-xl bg-white/10 border border-white/20 py-2.5 text-center text-sm font-semibold text-white hover:bg-white/20 transition-colors"
                   >
-                    Đăng nhập
+                    {t('navbar.login')}
                   </button>
                   <button
                     onClick={() => openAuthModal('register')}
                     className="rounded-xl bg-[#e96a52] py-2.5 text-center text-sm font-semibold text-white hover:bg-[#d75c46] transition-colors"
                   >
-                    Đăng ký
+                    {t('navbar.register')}
                   </button>
                 </div>
               )}

@@ -1,8 +1,12 @@
+import { useTranslation } from 'react-i18next'
+
 export default function EventPagination({
   page,
   lastPage,
   onPageChange,
 }) {
+  const { t } = useTranslation()
+
   if (lastPage <= 1) {
     return null
   }
@@ -16,7 +20,7 @@ export default function EventPagination({
         disabled={page === 1}
         className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Prev
+        {t('pagination.prev')}
       </button>
 
       {Array.from(
@@ -47,7 +51,7 @@ export default function EventPagination({
         disabled={page === lastPage}
         className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-500 disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Next
+        {t('pagination.next')}
       </button>
 
     </div>

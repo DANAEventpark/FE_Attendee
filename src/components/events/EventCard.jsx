@@ -5,6 +5,7 @@ import {
   FaClock,
 } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 import heroFallback from '@/assets/hero.png'
 import artImg from '@/assets/art.jpg'
@@ -27,38 +28,43 @@ const getCategoryImage = (imageName) => {
   }
 }
 
-const DATE_FORMATTER = new Intl.DateTimeFormat('vi-VN', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-})
-
-function formatDate(dateValue) {
-  if (!dateValue) return 'Đang cập nhật'
-  const date = new Date(dateValue)
-  if (Number.isNaN(date.getTime())) return 'Đang cập nhật'
-  return DATE_FORMATTER.format(date)
-}
-
-function formatDateRange(startTime, endTime) {
-  if (!startTime) return 'Đang cập nhật lịch trình'
-  const start = new Date(startTime)
-  const end = endTime ? new Date(endTime) : null
-  if (Number.isNaN(start.getTime())) return 'Đang cập nhật lịch trình'
-
-  const startLabel = DATE_FORMATTER.format(start)
-  if (!end || Number.isNaN(end.getTime())) return startLabel
-
-  return `${startLabel} - ${DATE_FORMATTER.format(end)}`
-}
+// Date formatters will be created dynamically inside the component to support active language switching
 
 export default function EventCard({ event }) {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
+  const currentLang = i18n.language
+
+  const dateLang = currentLang === 'en' ? 'en-US' : 'vi-VN'
+  const dateFormatter = new Intl.DateTimeFormat(dateLang, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+  const formatDate = (dateValue) => {
+    if (!dateValue) return t('event.updating', 'Đang cập nhật')
+    const date = new Date(dateValue)
+    if (Number.isNaN(date.getTime())) return t('event.updating', 'Đang cập nhật')
+    return dateFormatter.format(date)
+  }
+
+  const formatDateRange = (startTime, endTime) => {
+    if (!startTime) return t('event.updating_schedule', 'Đang cập nhật lịch trình')
+    const start = new Date(startTime)
+    const end = endTime ? new Date(endTime) : null
+    if (Number.isNaN(start.getTime())) return t('event.updating_schedule', 'Đang cập nhật lịch trình')
+
+    const startLabel = dateFormatter.format(start)
+    if (!end || Number.isNaN(end.getTime())) return startLabel
+
+    return `${startLabel} - ${dateFormatter.format(end)}`
+  }
 
   const displayImage = event.category?.image ? getCategoryImage(event.category.image) : heroFallback
-  const categoryName = event.category?.name ?? 'Sự kiện'
+  const categoryName = event.category?.name ? t('category.' + event.category.name, event.category.name) : t('category.default_category', 'Sự kiện')
   const rating = Number(event.reviews_avg_rating ?? 0)
   const totalSlots = event.capacity ?? 0
   const registeredCount = event.confirmed_registrations_count ?? 0
@@ -103,14 +109,14 @@ export default function EventCard({ event }) {
             {/* Địa điểm */}
             <div className="flex items-start gap-2.5">
               <FaMapMarkerAlt className="text-[17px] text-slate-500 mt-0.5 shrink-0" />
-              <span className="line-clamp-1" title={event.location}>{event.location ?? 'Đang cập nhật địa điểm'}</span>
+              <span className="line-clamp-1" title={event.location}>{event.location ?? t('event.updating_location', 'Đang cập nhật địa điểm')}</span>
             </div>
 
             {/* Hạn đăng ký */}
             <div className="flex items-start gap-2.5">
               <FaClock className="text-[16px] text-slate-500 mt-1 shrink-0" />
               <span className="line-clamp-1">
-                Hạn đăng ký: <b className="text-slate-900 font-semibold">{formatDate(event.registration_deadline)}</b>
+                {t('event.deadline_prefix', 'Hạn đăng ký:')} <b className="text-slate-900 font-semibold">{formatDate(event.registration_deadline)}</b>
               </span>
             </div>
           </div>
@@ -121,13 +127,13 @@ export default function EventCard({ event }) {
           <div className="flex items-center justify-between pt-1">
             {/* Hiển thị số slot */}
             <p className="text-[16px] font-bold text-[#2d4a57]">
-              Còn {remainingSlots}/{totalSlots} slot
+              {t('event.remaining_slots', { remaining: remainingSlots, total: totalSlots })}
             </p>
             
             {/* Số điểm đánh giá sao */}
             <div className="flex items-center gap-1 text-sm font-semibold text-slate-600">
               <FaStar className="text-amber-400 text-base" />
-              <span>{rating > 0 ? rating.toFixed(1) : 'Mới'}</span>
+              <span>{rating > 0 ? rating.toFixed(1) : t('event.new_rating', 'Mới')}</span>
             </div>
           </div>
 
@@ -137,7 +143,7 @@ export default function EventCard({ event }) {
             onClick={() => navigate(`/events/${event.id}`)}
             className="w-full rounded-[14px] bg-[#e14d34] py-3 text-center text-[16px] font-bold text-white transition-all duration-200 hover:bg-[#c93f28] active:scale-[0.98]"
           >
-            Xem chi tiết
+            {t('event.view_details', 'Xem chi tiết')}
           </button>
         </div>
 
