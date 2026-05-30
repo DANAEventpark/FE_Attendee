@@ -32,7 +32,7 @@ const getCategoryImage = (imageName) => {
 // Format ngày theo kiểu: Thứ X, DD/MM/YYYY
 const formatDate = (dateStr) => {
   if (!dateStr) return 'Đang cập nhật'
-  const date = new Date(dateStr)
+  const date = new Date(typeof dateStr === 'string' ? dateStr.replace(/-/g, '/') : dateStr)
   if (isNaN(date.getTime())) return 'Đang cập nhật'
   return new Intl.DateTimeFormat('vi-VN', {
     weekday: 'short',
@@ -45,7 +45,7 @@ const formatDate = (dateStr) => {
 // Format giờ HH:MM
 const formatTime = (dateStr) => {
   if (!dateStr) return ''
-  const date = new Date(dateStr)
+  const date = new Date(typeof dateStr === 'string' ? dateStr.replace(/-/g, '/') : dateStr)
   if (isNaN(date.getTime())) return ''
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
@@ -90,11 +90,11 @@ export default function RegistrationCard({ registration, tab, onViewDetail }) {
             {tab === 'registered' && (
               isEventCancelled ? (
                 <span className="inline-flex items-center gap-1 rounded bg-red-50 px-2 py-0.5 text-[11px] font-bold text-red-600 border border-red-200">
-                  Đã huỷ
+                  Canceled
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-200">
-                  Sắp diễn ra
+                  Coming soon
                 </span>
               )
             )}

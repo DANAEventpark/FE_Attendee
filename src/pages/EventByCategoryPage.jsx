@@ -80,7 +80,7 @@ const EventByCategoryPage = () => {
                                 {/* Chi tiết Meta ở dưới cùng card */}
                                 <div className="border-t border-gray-100 pt-4 space-y-1.5 text-xs text-gray-500">
                                     <p>📍 <strong className="text-gray-700">Địa điểm:</strong> {event.location}</p>
-                                    <p>📅 <strong className="text-gray-700">Thời gian:</strong> {new Date(event.start_time).toLocaleString('vi-VN')}</p>
+                                    <p>📅 <strong className="text-gray-700">Thời gian:</strong> {new Date(event.start_time.replace(/-/g, '/')).toLocaleString('vi-VN')}</p>
                                     <p>👥 <strong className="text-gray-700">Giới hạn:</strong> {event.capacity} người</p>
                                 </div>
 

@@ -34,7 +34,7 @@ const getCategoryImage = (imageName) => {
 
 const formatDateFull = (dateStr) => {
   if (!dateStr) return 'Đang cập nhật'
-  const d = new Date(dateStr)
+  const d = new Date(typeof dateStr === 'string' ? dateStr.replace(/-/g, '/') : dateStr)
   if (isNaN(d.getTime())) return 'Đang cập nhật'
   return new Intl.DateTimeFormat('vi-VN', {
     weekday: 'long',
@@ -46,7 +46,7 @@ const formatDateFull = (dateStr) => {
 
 const formatTime = (dateStr) => {
   if (!dateStr) return ''
-  const d = new Date(dateStr)
+  const d = new Date(typeof dateStr === 'string' ? dateStr.replace(/-/g, '/') : dateStr)
   if (isNaN(d.getTime())) return ''
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
