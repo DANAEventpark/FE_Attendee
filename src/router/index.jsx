@@ -10,6 +10,9 @@ import AboutPage from '@/pages/AboutPage'
 import EventDetailPage from '@/pages/EventDetailPage'
 import DashboardPage from '@/pages/DashboardPage'
 import ProfilePage from '@/pages/ProfilePage'
+import NotFoundPage from '@/pages/errors/NotFoundPage'
+import ForbiddenPage from '@/pages/errors/ForbiddenPage'
+import ServerErrorPage from '@/pages/errors/ServerErrorPage'
 
 /**
  * Router Configuration — FE_Attendee
@@ -59,8 +62,16 @@ const router = createBrowserRouter([
         element: <ProtectedRoute><ProfilePage /></ProtectedRoute>
       },
       {
+        path: '/403',
+        element: <ForbiddenPage />
+      },
+      {
+        path: '/500',
+        element: <ServerErrorPage />
+      },
+      {
         path: '*',
-        element: <Navigate to="/" replace />
+        element: <NotFoundPage />
       }
     ]
   }
