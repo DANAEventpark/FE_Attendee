@@ -51,6 +51,19 @@ function formatDateRange(startTime, endTime) {
   const startLabel = DATE_FORMATTER.format(start)
   if (!end || Number.isNaN(end.getTime())) return startLabel
 
+  // Check if same day
+  const isSameDay = start.getFullYear() === end.getFullYear() &&
+                    start.getMonth() === end.getMonth() &&
+                    start.getDate() === end.getDate();
+
+  if (isSameDay) {
+    const endLabelTime = new Intl.DateTimeFormat('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(end);
+    return `${startLabel} - ${endLabelTime}`
+  }
+
   return `${startLabel} - ${DATE_FORMATTER.format(end)}`
 }
 

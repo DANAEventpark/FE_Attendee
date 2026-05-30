@@ -174,15 +174,22 @@ const EventDetailPage = () => {
     const catName = event.category ? event.category.name : 'Sự kiện';
     
     const startDate = new Date(typeof event.start_time === 'string' ? event.start_time.replace(/-/g, '/') : event.start_time);
+    const endDate = event.end_time ? new Date(typeof event.end_time === 'string' ? event.end_time.replace(/-/g, '/') : event.end_time) : null;
     const deadlineDate = new Date(typeof event.registration_deadline === 'string' ? event.registration_deadline.replace(/-/g, '/') : event.registration_deadline);
+    
     const formatDate = (date) => {
-        if (Number.isNaN(date.getTime())) return 'N/A';
+        if (!date || Number.isNaN(date.getTime())) return 'N/A';
         return `${date.getDate()} tháng ${date.getMonth() + 1}, ${date.getFullYear()}`;
     };
     const formatTime = (date) => {
-        if (Number.isNaN(date.getTime())) return 'N/A';
+        if (!date || Number.isNaN(date.getTime())) return 'N/A';
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
     };
+
+    const isSameDay = startDate && endDate && 
+        startDate.getFullYear() === endDate.getFullYear() &&
+        startDate.getMonth() === endDate.getMonth() &&
+        startDate.getDate() === endDate.getDate();
     
     const registeredCount = event.registrations ? event.registrations.length : 0;
     const remainingSpots = event.capacity - registeredCount;
@@ -249,8 +256,19 @@ const EventDetailPage = () => {
                                         <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500 mb-1">Ngày & giờ</p>
-                                        <p className="font-semibold text-slate-800">{formatDate(startDate)} - {formatTime(startDate)}</p>
+                                        <p className="text-sm text-gray-500 mb-1">Thời gian diễn ra</p>
+                                        {isSameDay ? (
+                                            <>
+                                                <p className="font-semibold text-slate-800">{formatDate(startDate)}</p>
+                                                <p className="font-semibold text-slate-800">{formatTime(startDate)} - {formatTime(endDate)}</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p className="font-semibold text-slate-800">{formatTime(startDate)}, {formatDate(startDate)}</p>
+                                                <p className="text-sm text-gray-400 my-0.5 text-center">đến</p>
+                                                <p className="font-semibold text-slate-800">{formatTime(endDate)}, {formatDate(endDate)}</p>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                                 
