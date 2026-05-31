@@ -9,6 +9,11 @@ import EventByCategoryPage from '@/pages/EventByCategoryPage'
 import AboutPage from '@/pages/AboutPage'
 import EventDetailPage from '@/pages/EventDetailPage'
 import DashboardPage from '@/pages/DashboardPage'
+import ProfilePage from '@/pages/ProfilePage'
+import NotFoundPage from '@/pages/errors/NotFoundPage'
+import ForbiddenPage from '@/pages/errors/ForbiddenPage'
+import ServerErrorPage from '@/pages/errors/ServerErrorPage'
+import VerifyEmailPage from '@/pages/VerifyEmailPage'
 
 /**
  * Router Configuration — FE_Attendee
@@ -23,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: '/register',
     element: <RegisterPage />,
+  },
+  {
+    path: '/verify-email',
+    element: <VerifyEmailPage />
   },
   {
     path: '/',
@@ -54,8 +63,20 @@ const router = createBrowserRouter([
         element: <DashboardPage />
       },
       {
+        path: '/profile',
+        element: <ProtectedRoute><ProfilePage /></ProtectedRoute>
+      },
+      {
+        path: '/403',
+        element: <ForbiddenPage />
+      },
+      {
+        path: '/500',
+        element: <ServerErrorPage />
+      },
+      {
         path: '*',
-        element: <Navigate to="/" replace />
+        element: <NotFoundPage />
       }
     ]
   }

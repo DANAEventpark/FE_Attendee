@@ -78,9 +78,10 @@ export default function Navbar() {
                   <span className="text-sm font-medium text-white/90">
                     {user.name}
                   </span>
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white border border-white/20">
-                    <User size={18} />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white border border-white/20 overflow-hidden">
+                    {user.avatar ? <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" /> : <User size={18} />}
                   </div>
+
                 </button>
 
                 {showUserDropdown && (
@@ -90,6 +91,14 @@ export default function Navbar() {
                       onClick={() => setShowUserDropdown(false)}
                     />
                     <div className="absolute right-0 mt-2 w-48 rounded-xl bg-[#173846] border border-white/10 shadow-xl py-1.5 z-20 text-sm animate-in fade-in-50 slide-in-from-top-2 duration-150">
+                      <Link
+                        to="/profile"
+                        onClick={() => setShowUserDropdown(false)}
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-white/10 transition-colors text-white"
+                      >
+                        <User size={15} />
+                        Hồ sơ
+                      </Link>
                       <Link
                         to="/dashboard"
                         onClick={() => setShowUserDropdown(false)}
@@ -190,15 +199,15 @@ export default function Navbar() {
             <div className="border-t border-white/10 pt-4">
               {user ? (
                 <div className="flex flex-col gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white border border-white/20">
-                      <User size={18} />
+                  <Link to="/profile" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 hover:bg-white/5 rounded-xl transition-colors">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white border border-white/20 overflow-hidden">
+                      {user.avatar ? <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" /> : <User size={18} />}
                     </div>
                     <div>
                       <p className="text-sm font-medium text-white/90">{user.name}</p>
                       <p className="text-xs text-white/50">{user.email}</p>
                     </div>
-                  </div>
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="w-full rounded-xl bg-[#e96a52] py-2.5 text-sm font-semibold text-white hover:bg-[#d75c46] transition-colors flex items-center justify-center gap-1.5"

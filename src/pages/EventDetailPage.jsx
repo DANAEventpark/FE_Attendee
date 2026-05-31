@@ -128,6 +128,30 @@ const EventDetailPage = () => {
         }
     };
 
+    const handleCancel = async () => {
+        if (!token) return;
+        const confirmCancel = window.confirm("Bạn có chắc chắn muốn hủy đăng ký tham gia sự kiện này không?");
+        if (!confirmCancel) return;
+
+        setRegistering(true);
+        try {
+            const response = await axios.post(`http://localhost:8000/api/events/${id}/cancel`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert(response.data.message || "Hủy đăng ký thành công!");
+            // reload data
+            const res = await axios.get(`http://localhost:8000/api/events/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setEvent(res.data.data);
+            setUserRegistration(res.data.user_registration || null);
+        } catch (error) {
+            alert(error.response?.data?.message || "Đã có lỗi xảy ra");
+        } finally {
+            setRegistering(false);
+        }
+    };
+
     const handleSubmitReview = async () => {
         if (rating === 0 || !comment.trim()) {
             alert("Vui lòng chọn số sao và nhập nội dung bình luận!");
@@ -173,10 +197,29 @@ const EventDetailPage = () => {
     const bannerImg = event.category ? getCategoryImage(event.category.image) : musicImg;
     const catName = event.category ? event.category.name : 'Sự kiện';
     
-    const startDate = new Date(event.start_time);
-    const deadlineDate = new Date(event.registration_deadline);
-    const formatDate = (date) => `${date.getDate()} tháng ${date.getMonth() + 1}, ${date.getFullYear()}`;
-    const formatTime = (date) => `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    const startDate = new Date(typeof event.start_time === 'string' ? event.start_time.replace(/-/g, '/') : event.start_time);
+    const endDate = event.end_time ? new Date(typeof event.end_time === 'string' ? event.end_time.replace(/-/g, '/') : event.end_time) : null;
+    const deadlineDate = new Date(typeof event.registration_deadline === 'string' ? event.registration_deadline.replace(/-/g, '/') : event.registration_deadline);
+    
+    const formatDate = (date) => {
+        if (!date || Number.isNaN(date.getTime())) return 'N/A';
+        return `${date.getDate()} tháng ${date.getMonth() + 1}, ${date.getFullYear()}`;
+    };
+    const formatTime = (date) => {
+        if (!date || Number.isNaN(date.getTime())) return 'N/A';
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    };
+
+    const isSameDay = startDate && endDate && 
+        startDate.getFullYear() === endDate.getFullYear() &&
+        startDate.getMonth() === endDate.getMonth() &&
+        startDate.getDate() === endDate.getDate();
+
+    const isEnded = endDate && !Number.isNaN(endDate.getTime()) ? Date.now() > endDate.getTime() : false;
+
+    const isCancellable = deadlineDate && !Number.isNaN(deadlineDate.getTime()) 
+        ? Date.now() < deadlineDate.getTime()
+        : false;
     
     const registeredCount = event.registrations ? event.registrations.length : 0;
     const remainingSpots = event.capacity - registeredCount;
@@ -243,8 +286,19 @@ const EventDetailPage = () => {
                                         <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500 mb-1">Ngày & giờ</p>
-                                        <p className="font-semibold text-slate-800">{formatDate(startDate)} - {formatTime(startDate)}</p>
+                                        <p className="text-sm text-gray-500 mb-1">Thời gian diễn ra</p>
+                                        {isSameDay ? (
+                                            <>
+                                                <p className="font-semibold text-slate-800">{formatDate(startDate)}</p>
+                                                <p className="font-semibold text-slate-800">{formatTime(startDate)} - {formatTime(endDate)}</p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p className="font-semibold text-slate-800">{formatTime(startDate)}, {formatDate(startDate)}</p>
+                                                <p className="text-sm text-gray-400 my-0.5 text-center">đến</p>
+                                                <p className="font-semibold text-slate-800">{formatTime(endDate)}, {formatDate(endDate)}</p>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                                 
@@ -314,6 +368,14 @@ const EventDetailPage = () => {
                                     </svg>
                                     <p className="text-amber-800 font-semibold mb-1">Quyền đánh giá bị giới hạn</p>
                                     <p className="text-amber-700 text-sm">Bạn cần đăng ký tham gia và được chấp nhận vào sự kiện này trước khi có thể gửi bình luận đánh giá.</p>
+                                </div>
+                            ) : !isEnded ? (
+                                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 text-center mb-8">
+                                    <svg className="w-8 h-8 text-blue-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p className="text-blue-800 font-semibold mb-1">Sự kiện chưa kết thúc</p>
+                                    <p className="text-blue-700 text-sm">Bạn chỉ có thể gửi đánh giá và bình luận sau khi sự kiện này đã chính thức kết thúc.</p>
                                 </div>
                             ) : (
                                 <>
@@ -418,14 +480,25 @@ const EventDetailPage = () => {
                             </div>
                             
                             {userRegistration ? (
-                                <button 
-                                    disabled={true}
-                                    className="w-full py-4 rounded-xl font-semibold text-lg bg-gray-200 text-gray-500 cursor-not-allowed"
-                                >
-                                    {userRegistration.status === 'approved' && 'Đã đăng ký chính thức'}
-                                    {userRegistration.status === 'pending' && 'Đang ở hàng chờ'}
-                                    {userRegistration.status === 'cancelled' && 'Đăng ký đã bị hủy'}
-                                </button>
+                                <div className="space-y-3">
+                                    <button 
+                                        disabled={true}
+                                        className="w-full py-4 rounded-xl font-semibold text-lg bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    >
+                                        {userRegistration.status === 'approved' && 'Đã đăng ký chính thức'}
+                                        {userRegistration.status === 'pending' && 'Đang ở hàng chờ'}
+                                        {userRegistration.status === 'cancelled' && 'Đăng ký đã bị hủy'}
+                                    </button>
+                                    {userRegistration.status !== 'cancelled' && isCancellable && (
+                                        <button 
+                                            onClick={handleCancel}
+                                            disabled={registering}
+                                            className="w-full py-3 rounded-xl font-semibold text-md border-2 border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center gap-2"
+                                        >
+                                            {registering ? 'Đang xử lý...' : 'Hủy đăng ký'}
+                                        </button>
+                                    )}
+                                </div>
                             ) : (
                                 <button 
                                     onClick={handleRegister}
