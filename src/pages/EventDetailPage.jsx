@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
@@ -43,65 +43,23 @@ const EventDetailPage = () => {
 
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        let intervalId = null;
-        let isFetching = false;
-
-        const fetchEvent = async () => {
-            if (isFetching) return;
-            isFetching = true;
-            try {
-                const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-                const response = await axios.get(`http://localhost:8000/api/events/${id}`, config);
-                setEvent(response.data.data);
-                setUserRegistration(response.data.user_registration || null);
-            } catch (err) {
-                console.error("Error fetching event details", err);
-                setError(err.response?.data?.message || "Không thể tải dữ liệu sự kiện.");
-            } finally {
-                setLoading(false);
-                isFetching = false;
-            }
-        };
-
-        const startPolling = () => {
-            stopPolling();
-            intervalId = setInterval(() => {
-                if (document.visibilityState === 'visible') {
-                    fetchEvent();
-                }
-            }, 3000);
-        };
-
-        const stopPolling = () => {
-            if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null;
-            }
-        };
-
-        const handleVisibilityChange = () => {
-            if (document.visibilityState === 'visible') {
-                fetchEvent();
-                startPolling();
-            } else {
-                stopPolling();
-            }
-        };
-
-        // Initial fetch only when page is visible
-        if (document.visibilityState === 'visible') {
-            fetchEvent();
-            startPolling();
+    const fetchEvent = useCallback(async () => {
+        try {
+            const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+            const response = await axios.get(`http://localhost:8000/api/events/${id}`, config);
+            setEvent(response.data.data);
+            setUserRegistration(response.data.user_registration || null);
+        } catch (err) {
+            console.error("Error fetching event details", err);
+            setError(err.response?.data?.message || "Không thể tải dữ liệu sự kiện.");
+        } finally {
+            setLoading(false);
         }
-
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-
-        return () => {
-            stopPolling();
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-        };
     }, [id, token]);
+
+    useEffect(() => {
+        fetchEvent();
+    }, [fetchEvent]);
 
     const handleRegister = async () => {
         setRegistering(true);
@@ -115,12 +73,7 @@ const EventDetailPage = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert(response.data.message || "Đăng ký thành công!");
-            // reload data
-            const res = await axios.get(`http://localhost:8000/api/events/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setEvent(res.data.data);
-            setUserRegistration(res.data.user_registration || null);
+            await fetchEvent();
         } catch (error) {
             alert(error.response?.data?.message || "Đã có lỗi xảy ra");
         } finally {
@@ -139,12 +92,7 @@ const EventDetailPage = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert(response.data.message || "Hủy đăng ký thành công!");
-            // reload data
-            const res = await axios.get(`http://localhost:8000/api/events/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setEvent(res.data.data);
-            setUserRegistration(res.data.user_registration || null);
+            await fetchEvent();
         } catch (error) {
             alert(error.response?.data?.message || "Đã có lỗi xảy ra");
         } finally {
@@ -176,13 +124,7 @@ const EventDetailPage = () => {
             alert("Gửi bình luận thành công!");
             setComment('');
             setRating(0);
-            
-            // reload data
-            const res = await axios.get(`http://localhost:8000/api/events/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setEvent(res.data.data);
-            setUserRegistration(res.data.user_registration || null);
+            await fetchEvent();
         } catch (error) {
             alert(error.response?.data?.message || "Đã có lỗi xảy ra");
         } finally {
