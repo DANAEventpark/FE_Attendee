@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { registerApi } from '../api/auth';
 
 const RegisterPage = () => {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -20,21 +22,21 @@ const RegisterPage = () => {
   const validateForm = () => {
     const newErrors = {};
     if (!form.email) {
-      newErrors.email = 'Vui lòng nhập email';
+      newErrors.email = t('register.error_email_required');
     } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = t('register.error_email_invalid');
     }
 
     if (!form.name) {
-      newErrors.name = 'Vui lòng nhập họ tên';
+      newErrors.name = t('register.error_name_required');
     } else if (form.name.length < 2) {
-      newErrors.name = 'Họ tên tối thiểu 2 ký tự';
+      newErrors.name = t('register.error_name_min');
     }
 
     if (!form.password) {
-      newErrors.password = 'Vui lòng nhập mật khẩu';
+      newErrors.password = t('register.error_password_required');
     } else if (form.password.length < 8) {
-      newErrors.password = 'Mật khẩu tối thiểu 8 ký tự';
+      newErrors.password = t('register.error_password_min');
     }
 
     setErrors(newErrors);
@@ -59,7 +61,7 @@ const RegisterPage = () => {
       // Delay 1.5s rồi redirect sang login
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      const msg = err.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.';
+      const msg = err.response?.data?.message || t('register.error_fallback');
       setApiError(msg);
     } finally {
       setLoading(false);
@@ -90,11 +92,11 @@ const RegisterPage = () => {
           </div>
 
           <div className="mb-6">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Tạo tài khoản</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{t('register.title')}</h1>
             <p className="text-sm text-gray-600 mt-2">
-              Đăng ký với tư cách <span className="text-[#2E6E7E] font-medium">Người tham gia</span>
+              {t('register.subtitle_prefix')}<span className="text-[#2E6E7E] font-medium">{t('register.subtitle_role')}</span>
             </p>
-            <p className="text-xs text-gray-400 mt-1">Tham gia cộng đồng EventSpark ngay hôm nay</p>
+            <p className="text-xs text-gray-400 mt-1">{t('register.tagline')}</p>
           </div>
 
           {apiError && (
@@ -105,14 +107,14 @@ const RegisterPage = () => {
 
           {success && (
             <div className="mb-6 p-3 bg-green-50 border border-green-300 text-green-700 text-sm rounded-lg">
-              Đăng ký thành công! Đang chuyển hướng...
+              {t('register.success_msg')}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5 mt-6">
             {/* Email Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('register.email_label')}</label>
               <input
                 name="email"
                 type="email"
@@ -128,11 +130,11 @@ const RegisterPage = () => {
 
             {/* Họ và Tên Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Họ và Tên</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('register.name_label')}</label>
               <input
                 name="name"
                 type="text"
-                placeholder="Nguyễn Văn A"
+                placeholder={t('register.name_placeholder')}
                 value={form.name}
                 onChange={handleChange}
                 className={`w-full px-4 py-3 border rounded-xl bg-gray-50/50 focus:ring-2 focus:ring-[#2E6E7E] focus:border-transparent outline-none transition-all ${
@@ -144,7 +146,7 @@ const RegisterPage = () => {
 
             {/* Mật khẩu Field */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Mật khẩu</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">{t('register.password_label')}</label>
               <div className="relative">
                 <input
                   name="password"
@@ -178,18 +180,18 @@ const RegisterPage = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Đang xử lý...
+                  {t('register.processing')}
                 </>
               ) : (
-                'Đăng ký'
+                t('register.submit_btn')
               )}
             </button>
           </form>
 
           <div className="mt-8 text-center text-sm">
-            <span className="text-gray-500">Bạn đã có tài khoản? </span>
+            <span className="text-gray-500">{t('register.has_account')}</span>
             <Link to="/login" className="text-blue-500 font-medium hover:underline">
-              Đăng nhập ngay
+              {t('register.login_now')}
             </Link>
           </div>
         </div>
@@ -219,20 +221,20 @@ const RegisterPage = () => {
 
           <div className="mt-auto pb-4 lg:pb-12">
             <h2 className="text-2xl lg:text-4xl font-bold text-white mb-3 leading-tight">
-              Sự kiện kết nối cộng đồng Đà Nẵng
+              {t('login.image_title')}
             </h2>
             <p className="text-sm lg:text-base text-gray-200 mb-6 max-w-md">
-              Khám phá hàng trăm sự kiện thú vị tham gia và trải nghiệm ngay hôm nay
+              {t('login.image_subtitle')}
             </p>
             <div className="flex flex-wrap gap-2">
               <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
-                Sự kiện đa dạng
+                {t('login.badge_1')}
               </span>
               <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
-                Đặt vé dễ dàng
+                {t('login.badge_2')}
               </span>
               <span className="px-4 py-1.5 rounded-full bg-yellow-500/80 text-white text-xs lg:text-sm font-medium backdrop-blur-sm border border-yellow-400/50">
-                Hoàn toàn miễn phí
+                {t('login.badge_3')}
               </span>
             </div>
           </div>

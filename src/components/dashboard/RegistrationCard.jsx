@@ -1,4 +1,5 @@
-import { Calendar, Clock, MapPin, AlertTriangle } from 'lucide-react'
+import { Calendar, Clock, MapPin, AlertTriangle, Loader2, Users } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import artImg from '@/assets/art.jpg'
 import communityImg from '@/assets/community.jpg'
 import educationImg from '@/assets/education.jpg'
@@ -30,11 +31,11 @@ const getCategoryImage = (imageName) => {
 }
 
 // Format ngày theo kiểu: Thứ X, DD/MM/YYYY
-const formatDate = (dateStr) => {
+const formatDate = (dateStr, lng) => {
   if (!dateStr) return 'Đang cập nhật'
   const date = new Date(typeof dateStr === 'string' ? dateStr.replace(/-/g, '/') : dateStr)
   if (isNaN(date.getTime())) return 'Đang cập nhật'
-  return new Intl.DateTimeFormat('vi-VN', {
+  return new Intl.DateTimeFormat(lng === 'en' ? 'en-US' : 'vi-VN', {
     weekday: 'short',
     day: '2-digit',
     month: '2-digit',
@@ -52,7 +53,8 @@ const formatTime = (dateStr) => {
 
 import { Link } from 'react-router-dom'
 
-export default function RegistrationCard({ registration, tab }) {
+export default function RegistrationCard({ registration, tab, onViewDetail }) {
+  const { t, i18n } = useTranslation()
   const event = registration?.event
   if (!event) return null
 
@@ -62,7 +64,7 @@ export default function RegistrationCard({ registration, tab }) {
 
   const startTime = formatTime(event.start_time)
   const endTime   = formatTime(event.end_time)
-  const timeRange = startTime && endTime ? `${startTime} – ${endTime}` : (startTime || 'Đang cập nhật')
+  const timeRange = startTime && endTime ? `${startTime} – ${endTime}` : (startTime || t('attendee_dashboard.card.updating', 'Đang cập nhật'))
 
   // Trạng thái sự kiện (do nhà tổ chức huỷ) — chỉ hiển thị ở tab "registered"
   const isEventCancelled = event.status === 'cancelled'
@@ -86,17 +88,17 @@ export default function RegistrationCard({ registration, tab }) {
           {/* Badge danh mục & trạng thái */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-block rounded bg-[#E8F5F8] px-2.5 py-0.5 text-xs font-bold text-[#2E6E7E]">
-              {categoryName}
+              {t('category.' + categoryName, categoryName)}
             </span>
             {/* Trạng thái đăng ký */}
             {tab === 'registered' && (
               isEventCancelled ? (
                 <span className="inline-flex items-center gap-1 rounded bg-red-50 px-2 py-0.5 text-[11px] font-bold text-red-600 border border-red-200">
-                  Canceled
+                  {t('attendee_dashboard.card.cancelled', 'Đã huỷ')}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-600 border border-emerald-200">
-                  Coming soon
+                  {t('attendee_dashboard.card.upcoming', 'Sắp diễn ra')}
                 </span>
               )
             )}
@@ -107,12 +109,12 @@ export default function RegistrationCard({ registration, tab }) {
             )}
             {tab === 'waitlist' && (
               <span className="inline-flex items-center gap-1 rounded bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-[#C0442B] border border-amber-200">
-                Đang chờ
+                {t('attendee_dashboard.card.pending', 'Đang chờ')}
               </span>
             )}
             {tab === 'cancelled' && (
               <span className="inline-flex items-center gap-1 rounded bg-slate-50 px-2 py-0.5 text-[11px] font-bold text-slate-600 border border-slate-200">
-                Đã huỷ đăng ký
+                {t('attendee_dashboard.card.unregistered', 'Đã huỷ đăng ký')}
               </span>
             )}
           </div>
@@ -127,7 +129,7 @@ export default function RegistrationCard({ registration, tab }) {
             {/* Ngày */}
             <span className="flex items-center gap-1.5">
               <Calendar size={14} className="text-slate-400 shrink-0" />
-              {formatDate(event.start_time)}
+              {formatDate(event.start_time, i18n.language)}
             </span>
             {/* Giờ */}
             {(startTime || endTime) && (
@@ -149,7 +151,7 @@ export default function RegistrationCard({ registration, tab }) {
           {tab === 'registered' && isEventCancelled && event.cancel_reason && (
             <p className="text-xs text-red-600 bg-red-50 rounded-lg px-2.5 py-1.5 mt-2 line-clamp-1 border border-red-100">
               <AlertTriangle size={11} className="inline mr-1" />
-              Lý do huỷ: {event.cancel_reason}
+              {t('attendee_dashboard.card.cancel_reason', { reason: event.cancel_reason })}
             </p>
           )}
         </div>
@@ -159,7 +161,7 @@ export default function RegistrationCard({ registration, tab }) {
             to={`/events/${event.id}`}
             className="rounded bg-[#C0442B] px-5 py-2 text-xs sm:text-sm font-bold text-white hover:bg-[#A83821] active:scale-[0.97] transition-all duration-200 shadow-sm inline-block"
           >
-            Xem chi tiết
+            {t('attendee_dashboard.card.view_detail', 'Xem chi tiết')}
           </Link>
         </div>
       </div>

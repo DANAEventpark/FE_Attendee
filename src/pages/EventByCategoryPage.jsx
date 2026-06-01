@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '@/services/api'; 
 
 const EventByCategoryPage = () => {
     const { id } = useParams(); 
+    const { t, i18n } = useTranslation();
     const [events, setEvents] = useState([]);
     const [categoryName, setCategoryName] = useState('');
     const [loading, setLoading] = useState(true);
@@ -31,7 +33,7 @@ const EventByCategoryPage = () => {
     if (loading) {
         return (
             <div className="bg-[#fdf5e6] min-h-screen flex items-center justify-center font-sans">
-                <div className="text-[#2d3e50] text-lg font-medium animate-pulse">Đang tải sự kiện...</div>
+                <div className="text-[#2d3e50] text-lg font-medium animate-pulse">{t('event_by_category.loading', 'Đang tải sự kiện...')}</div>
             </div>
         );
     }
@@ -41,14 +43,15 @@ const EventByCategoryPage = () => {
             {/* Nút quay lại */}
             <div className="max-w-[1200px] mx-auto mb-6">
                 <Link to="/categories" className="inline-block text-[#2d3e50] font-medium hover:underline transition-all">
-                    ← Quay lại danh mục
+                    {t('event_by_category.back', '← Quay lại danh mục')}
                 </Link>
             </div>
 
             {/* Tiêu đề trang */}
             <div className="max-w-[1200px] mx-auto mb-10">
                 <h2 className="text-[#2d3e50] text-2xl md:text-3xl font-bold">
-                    Sự kiện thuộc danh mục: <span className="text-gray-600 font-semibold">{categoryName}</span>
+                    {t('event_by_category.title', 'Sự kiện thuộc danh mục: ')}
+                    <span className="text-gray-600 font-semibold">{t('category.' + categoryName, categoryName)}</span>
                 </h2>
             </div>
 
@@ -56,7 +59,7 @@ const EventByCategoryPage = () => {
             <div className="max-w-[1200px] mx-auto">
                 {events.length === 0 ? (
                     <div className="bg-white border border-[#e2e8f0] rounded-2xl p-12 text-center shadow-xs">
-                        <p className="text-gray-500 text-lg">Hiện tại chưa có sự kiện nào diễn ra trong danh mục này.</p>
+                        <p className="text-gray-500 text-lg">{t('event_by_category.empty', 'Hiện tại chưa có sự kiện nào diễn ra trong danh mục này.')}</p>
                     </div>
                 ) : (
                     /* CHIA 3 CỘT Ở ĐÂY: 1 cột trên mobile, 2 cột trên tablet, và chuẩn 3 cột trên máy tính (md:grid-cols-3) */
@@ -79,9 +82,9 @@ const EventByCategoryPage = () => {
 
                                 {/* Chi tiết Meta ở dưới cùng card */}
                                 <div className="border-t border-gray-100 pt-4 space-y-1.5 text-xs text-gray-500">
-                                    <p>📍 <strong className="text-gray-700">Địa điểm:</strong> {event.location}</p>
-                                    <p>📅 <strong className="text-gray-700">Thời gian:</strong> {new Date(event.start_time.replace(/-/g, '/')).toLocaleString('vi-VN')}</p>
-                                    <p>👥 <strong className="text-gray-700">Giới hạn:</strong> {event.capacity} người</p>
+                                    <p>📍 <strong className="text-gray-700">{t('event_by_category.location', 'Địa điểm')}:</strong> {event.location}</p>
+                                    <p>📅 <strong className="text-gray-700">{t('event_by_category.time', 'Thời gian')}:</strong> {new Date(typeof event.start_time === 'string' ? event.start_time.replace(/-/g, '/') : event.start_time).toLocaleString(i18n.language === 'en' ? 'en-US' : 'vi-VN')}</p>
+                                    <p>👥 <strong className="text-gray-700">{t('event_by_category.capacity', 'Giới hạn')}:</strong> {event.capacity} {t('event_by_category.people', 'người')}</p>
                                 </div>
 
                             </div>

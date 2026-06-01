@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const CategoryCard = (props) => {
+    const { t } = useTranslation();
     const getIcon = (name) => {
         switch (name) {
             case 'Music':
@@ -28,11 +30,11 @@ const CategoryCard = (props) => {
                 </div>
                 
                 <h4 className="text-[#2d3e50] text-lg font-bold mb-1 transition-colors group-hover:text-[#1a2633]">
-                    {props.name}
+                    {t('category.' + props.name, props.name)}
                 </h4>
                 
                 <p className="text-gray-500 text-sm">
-                    {props.count || 0} sự kiện
+                    {t('category.event_count', { count: props.count || 0 })}
                 </p>
                 
             </div>

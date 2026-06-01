@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import client from '@/api/client';
 import CategoryCard from '@/components/CategoryCard/CategoryCard';
 
 const CategoryPage = () => {
+    const { t } = useTranslation();
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
@@ -18,8 +20,8 @@ const CategoryPage = () => {
 
             {/* 1. Phần Header xanh đen dùng màu chủ đạo #2d3e50 */}
             <div className="bg-[#2d3e50] text-white text-center py-[70px] px-5">
-                <h1 className="text-[38px] font-bold mb-[15px]">Khám phá theo danh mục</h1>
-                <p className="text-base opacity-85 tracking-[0.5px]">Tìm kiếm sự kiện theo sở thích và đam mê của bạn</p>
+                <h1 className="text-[38px] font-bold mb-[15px]">{t('category_page.title', 'Khám phá theo danh mục')}</h1>
+                <p className="text-base opacity-85 tracking-[0.5px]">{t('category_page.subtitle', 'Tìm kiếm sự kiện theo sở thích và đam mê của bạn')}</p>
             </div>
 
             {/* 2. Phần danh sách nội dung bên dưới */}

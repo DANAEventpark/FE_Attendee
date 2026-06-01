@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 const fallbackCategories = [
   { id: 1, name: 'Music' },
   { id: 2, name: 'Sports' },
@@ -12,6 +14,7 @@ export default function CategoriesList({
   activeCategoryId = 'all',
   onSelectCategory,
 }) {
+  const { t } = useTranslation();
   const list = categories.length > 0 ? categories : fallbackCategories
 
   return (
@@ -25,7 +28,7 @@ export default function CategoriesList({
             : 'border border-blue-100 bg-white text-gray-600 hover:border-[#E85D4E] hover:text-[#E85D4E]'
         }`}
       >
-        Tat ca
+        {t('category.all', 'Tất cả')}
       </button>
 
       {list.map((item) => (
@@ -39,7 +42,7 @@ export default function CategoriesList({
               : 'border border-blue-100 bg-white text-gray-600 hover:border-[#E85D4E] hover:text-[#E85D4E]'
           }`}
         >
-          {item.name}
+          {t('category.' + item.name, item.name)}
         </button>
       ))}
     </div>

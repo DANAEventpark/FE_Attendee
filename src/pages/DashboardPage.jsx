@@ -1,6 +1,7 @@
 import { useState, useEffect, useDeferredValue } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronRight, Search, Calendar, CheckCircle2, Clock4, XCircle, ChevronLeft, ChevronRight as ChevronRightIcon, Inbox } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { ChevronRight, Search, SlidersHorizontal, Calendar, CheckCircle2, Clock4, XCircle, ChevronLeft, ChevronRight as ChevronRightIcon, Inbox } from 'lucide-react'
 
 import useAuthStore from '@/store/authStore'
 import {
@@ -33,6 +34,7 @@ const CURRENT_YEAR = new Date().getFullYear()
 const YEAR_OPTIONS = Array.from({ length: CURRENT_YEAR - 2022 }, (_, i) => CURRENT_YEAR - i)
 
 export default function DashboardPage() {
+  const { t } = useTranslation()
   const user     = useAuthStore((s) => s.user)
   const navigate = useNavigate()
 
@@ -133,28 +135,28 @@ export default function DashboardPage() {
   // ── Stat cards config ──────────────────────────────────────────────────────
   const STAT_CARDS = [
     {
-      label:   'Sắp diễn ra',
+      label:   t('attendee_dashboard.tab_registered_count', 'Sắp diễn ra'),
       value:   stats.registered,
       icon:    <Calendar size={20} />,
       color:   'text-[#e96a52]',
       iconBg:  'bg-[#e96a52]/10 text-[#e96a52]',
     },
     {
-      label:   'Đã tham gia',
+      label:   t('attendee_dashboard.tab_done_count', 'Đã tham gia'),
       value:   stats.done,
       icon:    <CheckCircle2 size={20} />,
       color:   'text-emerald-500',
       iconBg:  'bg-emerald-50 text-emerald-500',
     },
     {
-      label:   'Đang chờ',
+      label:   t('attendee_dashboard.tab_waitlist_count', 'Đang chờ'),
       value:   stats.waitlist,
       icon:    <Clock4 size={20} />,
       color:   'text-amber-500',
       iconBg:  'bg-amber-50 text-amber-500',
     },
     {
-      label:   'Đã huỷ',
+      label:   t('attendee_dashboard.tab_cancelled_count', 'Đã huỷ'),
       value:   stats.cancelled,
       icon:    <XCircle size={20} />,
       color:   'text-slate-400',
@@ -179,14 +181,14 @@ export default function DashboardPage() {
               <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
                 <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z"/>
               </svg>
-              Lịch sử sự kiện của tôi
+              {t('attendee_dashboard.history_badge', 'Lịch sử sự kiện của tôi')}
             </span>
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Dashboard</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">{t('navbar.dashboard', 'Dashboard')}</h1>
           <p className="text-white/60 text-sm sm:text-base max-w-lg">
-            Quản lý các sự kiện bạn đã đăng ký, danh sách chờ và lịch sử huỷ.
+            {t('attendee_dashboard.description', 'Quản lý các sự kiện bạn đã đăng ký, danh sách chờ và lịch sử huỷ.')}
           </p>
 
           {/* Stat Dividers */}
@@ -198,7 +200,7 @@ export default function DashboardPage() {
                     <span className="text-3xl sm:text-4xl font-extrabold text-white">
                       {statsLoading ? '—' : String(card.value).padStart(2, '0')}
                     </span>
-                    <span className="text-xs font-bold text-[#C0442B]">sự kiện</span>
+                    <span className="text-xs font-bold text-[#C0442B]">{t('attendee_dashboard.events_unit', 'sự kiện')}</span>
                   </div>
                   <p className="text-xs text-white/50 mt-1 font-semibold">{card.label}</p>
                 </div>
@@ -221,7 +223,7 @@ export default function DashboardPage() {
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Tìm kiếm sự kiện..."
+              placeholder={t('attendee_dashboard.search_placeholder', 'Tìm kiếm sự kiện...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#C0442B]/20 focus:border-[#C0442B]/40 transition shadow-sm"
@@ -234,9 +236,9 @@ export default function DashboardPage() {
             onChange={(e) => setCategoryId(e.target.value)}
             className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#C0442B]/20 focus:border-[#C0442B]/40 transition cursor-pointer shadow-sm"
           >
-            <option value="all">Tất cả danh mục</option>
+            <option value="all">{t('attendee_dashboard.all_categories', 'Tất cả danh mục')}</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
+              <option key={cat.id} value={cat.id}>{t('category.' + cat.name, cat.name)}</option>
             ))}
           </select>
 
@@ -246,7 +248,7 @@ export default function DashboardPage() {
             onChange={(e) => setYear(e.target.value)}
             className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-[#C0442B]/20 focus:border-[#C0442B]/40 transition cursor-pointer shadow-sm"
           >
-            <option value="all">Tất cả năm</option>
+            <option value="all">{t('attendee_dashboard.all_years', 'Tất cả năm')}</option>
             {YEAR_OPTIONS.map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
@@ -268,7 +270,7 @@ export default function DashboardPage() {
                     : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
                 }`}
               >
-                {tab.label}
+                {t('attendee_dashboard.tab_' + tab.key, tab.label)}
                 <span className={`inline-flex items-center justify-center h-5 min-w-[20px] rounded-full px-1.5 text-[11px] font-bold ${
                   isActive ? 'bg-white text-[#1F3846]' : 'bg-slate-100 text-slate-500'
                 }`}>
@@ -307,7 +309,7 @@ export default function DashboardPage() {
               onClick={() => setPage(1)}
               className="mt-4 rounded-xl bg-[#e96a52] px-5 py-2 text-sm font-semibold text-white hover:bg-[#d75c46] transition-colors"
             >
-              Thử lại
+              {t('attendee_dashboard.try_again', 'Thử lại')}
             </button>
           </div>
         ) : registrations.length === 0 ? (
@@ -316,19 +318,19 @@ export default function DashboardPage() {
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#e96a52]/10 mb-5">
               <Inbox size={32} className="text-[#e96a52]" />
             </div>
-            <p className="text-lg font-bold text-slate-700 mb-1">Chưa có sự kiện nào</p>
+            <p className="text-lg font-bold text-slate-700 mb-1">{t('attendee_dashboard.empty_title', 'Chưa có sự kiện nào')}</p>
             <p className="text-sm text-slate-500 max-w-xs">
-              {activeTab === 'registered' && 'Bạn chưa có sự kiện nào sắp diễn ra. Khám phá ngay!'}
-              {activeTab === 'done'       && 'Bạn chưa tham gia sự kiện nào đã hoàn thành.'}
-              {activeTab === 'waitlist'   && 'Bạn không có sự kiện nào trong danh sách chờ.'}
-              {activeTab === 'cancelled'  && 'Bạn chưa huỷ đăng ký sự kiện nào.'}
+              {activeTab === 'registered' && t('attendee_dashboard.empty_registered_desc', 'Bạn chưa có sự kiện nào sắp diễn ra. Khám phá ngay!')}
+              {activeTab === 'done'       && t('attendee_dashboard.empty_done_desc', 'Bạn chưa tham gia sự kiện nào đã hoàn thành.')}
+              {activeTab === 'waitlist'   && t('attendee_dashboard.empty_waitlist_desc', 'Bạn không có sự kiện nào trong danh sách chờ.')}
+              {activeTab === 'cancelled'  && t('attendee_dashboard.empty_cancelled_desc', 'Bạn chưa huỷ đăng ký sự kiện nào.')}
             </p>
             {activeTab === 'registered' && (
               <Link
                 to="/"
                 className="mt-5 inline-block rounded-xl bg-[#e96a52] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#d75c46] transition-colors"
               >
-                Khám phá sự kiện
+                {t('attendee_dashboard.explore_btn', 'Khám phá sự kiện')}
               </Link>
             )}
           </div>

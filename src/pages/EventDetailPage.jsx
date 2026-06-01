@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '@/services/api';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import artImg from '@/assets/art.jpg';
 import communityImg from '@/assets/community.jpg';
@@ -31,8 +32,8 @@ const getCategoryColor = (categoryName) => {
 const EventDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
     const { user, token } = useAuthStore();
-    // const token = useAuthStore((state) => state.token);
     const [event, setEvent] = useState(null);
     const [userRegistration, setUserRegistration] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -40,22 +41,20 @@ const EventDetailPage = () => {
     const [rating, setRating] = useState(0);
     const [registering, setRegistering] = useState(false);
     const [submittingReview, setSubmittingReview] = useState(false);
-
     const [error, setError] = useState(null);
 
     const fetchEvent = useCallback(async () => {
         try {
-            const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
-            const response = await axios.get(`http://localhost:8000/api/events/${id}`, config);
+            const response = await api.get(`/events/${id}`);
             setEvent(response.data.data);
             setUserRegistration(response.data.user_registration || null);
         } catch (err) {
             console.error("Error fetching event details", err);
-            setError(err.response?.data?.message || "Không thể tải dữ liệu sự kiện.");
+            setError(err.response?.data?.message || t('event_detail.error_loading', "Không thể tải dữ liệu sự kiện."));
         } finally {
             setLoading(false);
         }
-    }, [id, token]);
+    }, [id, t]);
 
     useEffect(() => {
         fetchEvent();
@@ -65,36 +64,15 @@ const EventDetailPage = () => {
         setRegistering(true);
         try {
             if (!token) {
-                alert("Vui lòng đăng nhập để đăng ký tham gia!");
+                alert(t('event_detail.login_required_alert', "Vui lòng đăng nhập để đăng ký tham gia!"));
                 setRegistering(false);
                 return;
             }
-            const response = await axios.post(`http://localhost:8000/api/events/${id}/register`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            alert(response.data.message || "Đăng ký thành công!");
+            const response = await api.post(`/events/${id}/register`, {});
+            alert(response.data.message || t('event_detail.success_alert', "Đăng ký thành công!"));
             await fetchEvent();
         } catch (error) {
-            alert(error.response?.data?.message || "Đã có lỗi xảy ra");
-        } finally {
-            setRegistering(false);
-        }
-    };
-
-    const handleCancel = async () => {
-        if (!token) return;
-        const confirmCancel = window.confirm("Bạn có chắc chắn muốn hủy đăng ký tham gia sự kiện này không?");
-        if (!confirmCancel) return;
-
-        setRegistering(true);
-        try {
-            const response = await axios.post(`http://localhost:8000/api/events/${id}/cancel`, {}, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            alert(response.data.message || "Hủy đăng ký thành công!");
-            await fetchEvent();
-        } catch (error) {
-            alert(error.response?.data?.message || "Đã có lỗi xảy ra");
+            alert(error.response?.data?.message || t('event_detail.general_error_alert', "Đã có lỗi xảy ra"));
         } finally {
             setRegistering(false);
         }
@@ -102,39 +80,37 @@ const EventDetailPage = () => {
 
     const handleSubmitReview = async () => {
         if (rating === 0 || !comment.trim()) {
-            alert("Vui lòng chọn số sao và nhập nội dung bình luận!");
+            alert(t('event_detail.comment_empty_alert', "Vui lòng chọn số sao và nhập nội dung bình luận!"));
             return;
         }
         
         setSubmittingReview(true);
         try {
             if (!token) {
-                alert("Vui lòng đăng nhập để bình luận!");
+                alert(t('event_detail.comment_login_required', "Vui lòng đăng nhập để bình luận!"));
                 setSubmittingReview(false);
                 return;
             }
             
-            await axios.post(`http://localhost:8000/api/events/${id}/reviews`, {
+            await api.post(`/events/${id}/reviews`, {
                 rating,
                 comment
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
             
-            alert("Gửi bình luận thành công!");
+            alert(t('event_detail.comment_success_alert', "Gửi bình luận thành công!"));
             setComment('');
             setRating(0);
             await fetchEvent();
         } catch (error) {
-            alert(error.response?.data?.message || "Đã có lỗi xảy ra");
+            alert(error.response?.data?.message || t('event_detail.general_error_alert', "Đã có lỗi xảy ra"));
         } finally {
             setSubmittingReview(false);
         }
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#fdfaf2]">Loading...</div>;
+    if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#fdfaf2]">{t('event_detail.loading', 'Loading...')}</div>;
     if (error) return <div className="min-h-screen flex items-center justify-center bg-[#fdfaf2] text-red-500 font-medium">{error}</div>;
-    if (!event) return <div className="min-h-screen flex items-center justify-center bg-[#fdfaf2]">Event not found</div>;
+    if (!event) return <div className="min-h-screen flex items-center justify-center bg-[#fdfaf2]">{t('event_detail.not_found', 'Event not found')}</div>;
 
     const bannerImg = event.category ? getCategoryImage(event.category.image) : musicImg;
     const catName = event.category ? event.category.name : 'Sự kiện';
@@ -145,6 +121,9 @@ const EventDetailPage = () => {
     
     const formatDate = (date) => {
         if (!date || Number.isNaN(date.getTime())) return 'N/A';
+        if (i18n.language === 'en') {
+            return new Intl.DateTimeFormat('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).format(date);
+        }
         return `${date.getDate()} tháng ${date.getMonth() + 1}, ${date.getFullYear()}`;
     };
     const formatTime = (date) => {
@@ -193,7 +172,7 @@ const EventDetailPage = () => {
                 <div className="absolute top-0 left-0 w-full p-4 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent">
                      {/* Giả định có header chung, ta thêm nút Quay lại ở đây */}
                      <button onClick={() => navigate(-1)} className="text-white border border-white rounded-full px-4 py-1 text-sm hover:bg-white/20 transition backdrop-blur-sm flex items-center gap-2">
-                        <span>&lt;</span> Quay lại
+                        <span>&lt;</span> {t('event_detail.back', 'Quay lại')}
                      </button>
                 </div>
             </div>
@@ -207,7 +186,7 @@ const EventDetailPage = () => {
                         {/* Detail Card */}
                         <div className="bg-white rounded-3xl shadow-lg p-6 sm:p-10">
                             <span className={`inline-block px-4 py-1 rounded-full text-sm font-medium mb-4 ${getCategoryColor(catName)}`}>
-                                {catName}
+                                {t('category.' + catName, catName)}
                             </span>
                             
                             <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-8">{event.title}</h1>
@@ -218,7 +197,9 @@ const EventDetailPage = () => {
                                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
                                     </svg>
                                     <span className="text-lg font-bold text-slate-800">{avgRating}</span>
-                                    <span className="text-slate-500 text-sm font-medium">({reviewsCount} đánh giá)</span>
+                                    <span className="text-slate-500 text-sm font-medium">
+                                        {t('event_detail.rating_count', { count: reviewsCount })}
+                                    </span>
                                 </div>
                             )}
                             
@@ -228,7 +209,7 @@ const EventDetailPage = () => {
                                         <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500 mb-1">Thời gian diễn ra</p>
+                                        <p className="text-sm text-gray-500 mb-1">{t('event_detail.date_time', 'Ngày & giờ')}</p>
                                         {isSameDay ? (
                                             <>
                                                 <p className="font-semibold text-slate-800">{formatDate(startDate)}</p>
@@ -249,21 +230,21 @@ const EventDetailPage = () => {
                                         <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                                     </div>
                                     <div>
-                                        <p className="text-sm text-gray-500 mb-1">Địa điểm</p>
+                                        <p className="text-sm text-gray-500 mb-1">{t('event_detail.location', 'Địa điểm')}</p>
                                         <p className="font-semibold text-slate-800">{event.location}</p>
                                     </div>
                                 </div>
                             </div>
                             
                             <div className="mb-8">
-                                <h2 className="text-xl font-bold text-slate-800 mb-4">Giới thiệu sự kiện</h2>
+                                <h2 className="text-xl font-bold text-slate-800 mb-4">{t('event_detail.about_title', 'Giới thiệu sự kiện')}</h2>
                                 <div className="text-gray-600 whitespace-pre-line leading-relaxed">
                                     {event.description}
                                 </div>
                             </div>
                             
                             <div>
-                                <h2 className="text-xl font-bold text-slate-800 mb-4">Người tham gia</h2>
+                                <h2 className="text-xl font-bold text-slate-800 mb-4">{t('event_detail.attendees_title', 'Người tham gia')}</h2>
                                 <div className="flex items-center">
                                     <div className="flex -space-x-3">
                                         {event.registrations && event.registrations.slice(0, 5).map((reg, idx) => (
@@ -277,7 +258,7 @@ const EventDetailPage = () => {
                                             </div>
                                         )}
                                     </div>
-                                    <span className="ml-4 text-sm text-gray-500">đang tham dự</span>
+                                    <span className="ml-4 text-sm text-gray-500">{t('event_detail.attending_suffix', 'đang tham dự')}</span>
                                 </div>
                             </div>
                         </div>
@@ -285,7 +266,7 @@ const EventDetailPage = () => {
                         {/* Comments Card */}
                         <div className="bg-white rounded-3xl shadow-lg p-6 sm:p-10 border border-[#fef3c7]">
                             <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
-                                <h2 className="text-xl font-bold text-slate-800">Bình luận ({reviewsCount})</h2>
+                                <h2 className="text-xl font-bold text-slate-800">{t('event_detail.comments_title', { count: reviewsCount })}</h2>
                                 {avgRating && (
                                     <div className="flex items-center gap-1">
                                         {[...Array(5)].map((_, i) => (
@@ -300,16 +281,16 @@ const EventDetailPage = () => {
                             
                             {!token ? (
                                 <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center mb-8">
-                                    <p className="text-slate-600 font-medium mb-3">Vui lòng đăng nhập để bình luận và đánh giá sự kiện.</p>
-                                    <button onClick={() => navigate('/login')} className="bg-slate-800 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-slate-700 transition">Đăng nhập ngay</button>
+                                    <p className="text-slate-600 font-medium mb-3">{t('event_detail.comment_login_prompt', 'Vui lòng đăng nhập để bình luận và đánh giá sự kiện.')}</p>
+                                    <button onClick={() => navigate('/login')} className="bg-slate-800 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-slate-700 transition">{t('event_detail.login_now', 'Đăng nhập ngay')}</button>
                                 </div>
                             ) : !isRegistered ? (
                                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center mb-8">
                                     <svg className="w-8 h-8 text-amber-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                                     </svg>
-                                    <p className="text-amber-800 font-semibold mb-1">Quyền đánh giá bị giới hạn</p>
-                                    <p className="text-amber-700 text-sm">Bạn cần đăng ký tham gia và được chấp nhận vào sự kiện này trước khi có thể gửi bình luận đánh giá.</p>
+                                    <p className="text-amber-800 font-semibold mb-1">{t('event_detail.review_restricted_title', 'Quyền đánh giá bị giới hạn')}</p>
+                                    <p className="text-amber-700 text-sm">{t('event_detail.review_restricted_desc', 'Bạn cần đăng ký tham gia và được chấp nhận vào sự kiện này trước khi có thể gửi bình luận đánh giá.')}</p>
                                 </div>
                             ) : !isEnded ? (
                                 <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6 text-center mb-8">
@@ -335,7 +316,7 @@ const EventDetailPage = () => {
                                     <textarea 
                                         value={comment}
                                         onChange={(e) => setComment(e.target.value)}
-                                        placeholder="Nhập bình luận của bạn..."
+                                        placeholder={t('event_detail.comment_placeholder', 'Nhập bình luận của bạn...')}
                                         className="w-full border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#BCE2CD] resize-none mb-4"
                                         rows="3"
                                     ></textarea>
@@ -345,7 +326,7 @@ const EventDetailPage = () => {
                                             disabled={submittingReview}
                                             className="bg-slate-800 text-white px-6 py-2 rounded-xl hover:bg-slate-700 transition disabled:opacity-50"
                                         >
-                                            {submittingReview ? 'Đang gửi...' : 'Gửi bình luận'}
+                                            {submittingReview ? t('event_detail.submitting', 'Đang gửi...') : t('event_detail.submit_review', 'Gửi bình luận')}
                                         </button>
                                     </div>
                                 </>
@@ -361,7 +342,7 @@ const EventDetailPage = () => {
                                             </div>
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1">
-                                                    <h4 className="font-semibold text-slate-800">{rev.user?.name || 'Người dùng'}</h4>
+                                                    <h4 className="font-semibold text-slate-800">{rev.user?.name || t('event_detail.modal.unknown', 'Người dùng')}</h4>
                                                     <div className="flex">
                                                         {[...Array(5)].map((_, i) => (
                                                             <svg key={i} className={`w-3 h-3 ${i < rev.rating ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
@@ -388,33 +369,39 @@ const EventDetailPage = () => {
                         <div className="bg-white rounded-3xl shadow-lg p-6 sm:p-8 sticky top-24 border border-[#BCE2CD]">
                             <div className="space-y-4 mb-8">
                                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                                    <span className="text-gray-500 text-sm">Trạng thái sự kiện:</span>
-                                    <span className="text-green-600 font-semibold">{event.status === 'published' ? 'Đang mở đăng ký' : 'Chưa mở'}</span>
+                                    <span className="text-gray-500 text-sm">{t('event_detail.status_label', 'Trạng thái sự kiện:')}</span>
+                                    <span className="text-green-600 font-semibold">
+                                        {event.status === 'published' ? t('event_detail.status_open', 'Đang mở đăng ký') : t('event_detail.status_closed', 'Chưa mở')}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                                    <span className="text-gray-500 text-sm">Sức chứa: {event.capacity} người</span>
-                                    <span className="text-[#F05A4A] font-semibold text-sm">Còn {remainingSpots > 0 ? remainingSpots : 0} chỗ</span>
+                                    <span className="text-gray-500 text-sm">
+                                        {t('event_detail.capacity', { capacity: event.capacity })}
+                                    </span>
+                                    <span className="text-[#F05A4A] font-semibold text-sm">
+                                        {remainingSpots > 0 ? t('event_detail.spots_left', { count: remainingSpots }) : t('event_detail.spots_full', 'Hết chỗ')}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between items-center pb-2">
-                                    <span className="text-gray-500 text-sm">Hạn đăng ký:</span>
+                                    <span className="text-gray-500 text-sm">{t('event_detail.deadline', 'Hạn đăng ký:')}</span>
                                     <span className="text-slate-800 font-medium text-sm">{formatDate(deadlineDate)}</span>
                                 </div>
                                 {userRegistration && (
                                     <div className="flex justify-between items-center border-t border-gray-100 pt-4 mt-2">
-                                        <span className="text-gray-500 text-sm">Đăng ký của bạn:</span>
+                                        <span className="text-gray-500 text-sm">{t('event_detail.your_registration', 'Đăng ký của bạn:')}</span>
                                         {userRegistration.status === 'approved' && (
                                             <span className="bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-200">
-                                                Chính thức
+                                                {t('event_detail.status_approved', 'Chính thức')}
                                             </span>
                                         )}
                                         {userRegistration.status === 'pending' && (
                                             <span className="bg-amber-100 text-amber-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-200">
-                                                Đang chờ duyệt
+                                                {t('event_detail.status_pending', 'Đang chờ duyệt')}
                                             </span>
                                         )}
                                         {userRegistration.status === 'cancelled' && (
                                             <span className="bg-rose-100 text-rose-800 text-xs font-semibold px-2.5 py-1 rounded-full border border-rose-200">
-                                                Đã hủy
+                                                {t('event_detail.status_cancelled', 'Đã hủy')}
                                             </span>
                                         )}
                                     </div>
@@ -427,9 +414,9 @@ const EventDetailPage = () => {
                                         disabled={true}
                                         className="w-full py-4 rounded-xl font-semibold text-lg bg-gray-200 text-gray-500 cursor-not-allowed"
                                     >
-                                        {userRegistration.status === 'approved' && 'Đã đăng ký chính thức'}
-                                        {userRegistration.status === 'pending' && 'Đang ở hàng chờ'}
-                                        {userRegistration.status === 'cancelled' && 'Đăng ký đã bị hủy'}
+                                        {userRegistration.status === 'approved' && t('event_detail.registered_approved', 'Đã đăng ký chính thức')}
+                                        {userRegistration.status === 'pending' && t('event_detail.registered_pending', 'Đang ở hàng chờ')}
+                                        {userRegistration.status === 'cancelled' && t('event_detail.registered_cancelled', 'Đăng ký đã bị hủy')}
                                     </button>
                                     {userRegistration.status !== 'cancelled' && isCancellable && (
                                         <button 
@@ -437,7 +424,7 @@ const EventDetailPage = () => {
                                             disabled={registering}
                                             className="w-full py-3 rounded-xl font-semibold text-md border-2 border-rose-500 text-rose-500 hover:bg-rose-50 hover:text-rose-600 transition flex items-center justify-center gap-2"
                                         >
-                                            {registering ? 'Đang xử lý...' : 'Hủy đăng ký'}
+                                            {registering ? t('event_detail.processing', 'Đang xử lý...') : t('event_detail.cancel_btn', 'Hủy đăng ký')}
                                         </button>
                                     )}
                                 </div>
@@ -454,10 +441,10 @@ const EventDetailPage = () => {
                                     }`}
                                 >
                                     {registering 
-                                        ? 'Đang xử lý...' 
+                                        ? t('event_detail.processing', 'Đang xử lý...') 
                                         : (new Date() > deadlineDate)
-                                          ? 'Hết hạn đăng ký'
-                                          : (remainingSpots > 0 ? 'Đăng ký tham gia' : 'Đăng ký vào hàng chờ')
+                                          ? t('event_detail.register_closed', 'Hết hạn đăng ký')
+                                          : (remainingSpots > 0 ? t('event_detail.register_now', 'Đăng ký tham gia') : t('event_detail.register_waitlist', 'Đăng ký vào hàng chờ'))
                                     }
                                 </button>
                             )}

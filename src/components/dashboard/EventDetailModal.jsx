@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Calendar, Clock, MapPin, AlertTriangle, Users, Tag, User } from 'lucide-react'
 import { cancelRegistration } from '@/services/registrationService'
+import { useTranslation } from 'react-i18next'
 import artImg from '@/assets/art.jpg'
 import communityImg from '@/assets/community.jpg'
 import educationImg from '@/assets/education.jpg'
@@ -34,11 +35,11 @@ const getCategoryImage = (imageName) => {
   }
 }
 
-const formatDateFull = (dateStr) => {
+const formatDateFull = (dateStr, lng) => {
   if (!dateStr) return 'Đang cập nhật'
   const d = new Date(typeof dateStr === 'string' ? dateStr.replace(/-/g, '/') : dateStr)
   if (isNaN(d.getTime())) return 'Đang cập nhật'
-  return new Intl.DateTimeFormat('vi-VN', {
+  return new Intl.DateTimeFormat(lng === 'en' ? 'en-US' : 'vi-VN', {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',
@@ -53,14 +54,9 @@ const formatTime = (dateStr) => {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-const REGISTRATION_STATUS_MAP = {
-  approved:  { label: 'Đã xác nhận',   color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
-  pending:   { label: 'Đang chờ duyệt', color: 'bg-amber-100 text-amber-700 border-amber-200' },
-  cancelled: { label: 'Đã huỷ đăng ký', color: 'bg-slate-100 text-slate-600 border-slate-200' },
-}
-
 export default function EventDetailModal({ registration, isOpen, onClose, tab, onCancelSuccess }) {
   const [cancelling, setCancelling] = useState(false)
+  const { t, i18n } = useTranslation()
   if (!isOpen || !registration) return null
 
   const event = registration.event
@@ -70,15 +66,21 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab, o
   const categoryName  = event.category?.name ?? 'Sự kiện'
   const isEventCancelledByOrganizer = event.status === 'cancelled'
 
-  const startDate = formatDateFull(event.start_time)
-  const endDate   = formatDateFull(event.end_time)
+  const startDate = formatDateFull(event.start_time, i18n.language)
+  const endDate   = formatDateFull(event.end_time, i18n.language)
   const startTime = formatTime(event.start_time)
   const endTime   = formatTime(event.end_time)
 
+  const REGISTRATION_STATUS_MAP = {
+    approved:  { label: t('attendee_dashboard.modal.status.approved', 'Đã xác nhận'),   color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+    pending:   { label: t('attendee_dashboard.modal.status.pending', 'Đang chờ duyệt'), color: 'bg-amber-100 text-amber-700 border-amber-200' },
+    cancelled: { label: t('attendee_dashboard.modal.status.cancelled', 'Đã huỷ đăng ký'), color: 'bg-slate-100 text-slate-600 border-slate-200' },
+  }
+
   const regStatus     = REGISTRATION_STATUS_MAP[registration.status] ?? REGISTRATION_STATUS_MAP.cancelled
   const registeredAt  = registration.created_at
-    ? new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(registration.created_at))
-    : 'Không rõ'
+    ? new Intl.DateTimeFormat(i18n.language === 'en' ? 'en-US' : 'vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(registration.created_at))
+    : t('attendee_dashboard.modal.unknown', 'Không rõ')
 
   const deadlineDate = event.registration_deadline ? new Date(typeof event.registration_deadline === 'string' ? event.registration_deadline.replace(/-/g, '/') : event.registration_deadline) : null;
   const isCancellable = deadlineDate && !Number.isNaN(deadlineDate.getTime()) ? Date.now() < deadlineDate.getTime() : false;
@@ -126,7 +128,7 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab, o
 
           {/* Badge danh mục */}
           <span className="absolute bottom-4 left-4 rounded-full bg-[#e96a52] px-4 py-1 text-xs font-bold text-white shadow">
-            {categoryName}
+            {t('category.' + categoryName, categoryName)}
           </span>
         </div>
 
@@ -140,13 +142,13 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab, o
                 <AlertTriangle size={16} className="text-red-500" />
               </div>
               <div>
-                <p className="text-sm font-bold text-red-700 mb-1">Sự kiện đã bị nhà tổ chức huỷ</p>
+                <p className="text-sm font-bold text-red-700 mb-1">{t('attendee_dashboard.modal.event_cancelled_title', 'Sự kiện đã bị nhà tổ chức huỷ')}</p>
                 {event.cancel_reason ? (
                   <p className="text-sm text-red-600 leading-relaxed">
-                    <span className="font-medium">Lý do: </span>{event.cancel_reason}
+                    <span className="font-medium">{t('attendee_dashboard.modal.reason_prefix', 'Lý do: ')}</span>{event.cancel_reason}
                   </p>
                 ) : (
-                  <p className="text-sm text-red-500 italic">Nhà tổ chức chưa cung cấp lý do huỷ.</p>
+                  <p className="text-sm text-red-500 italic">{t('attendee_dashboard.modal.no_reason', 'Nhà tổ chức chưa cung cấp lý do huỷ.')}</p>
                 )}
               </div>
             </div>
@@ -167,7 +169,7 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab, o
                 <Calendar size={15} className="text-[#e96a52]" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Ngày bắt đầu</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">{t('attendee_dashboard.modal.start_date', 'Ngày bắt đầu')}</p>
                 <p className="text-sm font-medium text-slate-700">{startDate}</p>
               </div>
             </div>
@@ -178,9 +180,9 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab, o
                 <Clock size={15} className="text-[#e96a52]" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Thời gian</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">{t('attendee_dashboard.modal.time', 'Thời gian')}</p>
                 <p className="text-sm font-medium text-slate-700">
-                  {startTime && endTime ? `${startTime} – ${endTime}` : (startTime || 'Đang cập nhật')}
+                  {startTime && endTime ? `${startTime} – ${endTime}` : (startTime || t('attendee_dashboard.modal.updating', 'Đang cập nhật'))}
                 </p>
               </div>
             </div>
@@ -191,8 +193,8 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab, o
                 <MapPin size={15} className="text-[#e96a52]" />
               </div>
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">Địa điểm</p>
-                <p className="text-sm font-medium text-slate-700">{event.location ?? 'Đang cập nhật'}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-0.5">{t('attendee_dashboard.modal.location', 'Địa điểm')}</p>
+                <p className="text-sm font-medium text-slate-700">{event.location ?? t('attendee_dashboard.modal.updating', 'Đang cập nhật')}</p>
               </div>
             </div>
           </div>
@@ -200,7 +202,7 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab, o
           {/* Mô tả sự kiện */}
           {event.description && (
             <div>
-              <h3 className="text-sm font-bold text-slate-700 mb-2">Giới thiệu sự kiện</h3>
+              <h3 className="text-sm font-bold text-slate-700 mb-2">{t('attendee_dashboard.modal.about_title', 'Giới thiệu sự kiện')}</h3>
               <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line line-clamp-5">
                 {event.description}
               </p>
@@ -209,41 +211,41 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab, o
 
           {/* Thông tin đăng ký của người dùng */}
           <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 space-y-2">
-            <h3 className="text-sm font-bold text-slate-700 mb-3">Thông tin đăng ký của bạn</h3>
+            <h3 className="text-sm font-bold text-slate-700 mb-3">{t('attendee_dashboard.modal.your_reg_title', 'Thông tin đăng ký của bạn')}</h3>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500">Trạng thái đăng ký</span>
+              <span className="text-slate-500">{t('attendee_dashboard.modal.reg_status_label', 'Trạng thái đăng ký')}</span>
               <span className={`inline-block rounded-full border px-3 py-0.5 text-xs font-semibold ${regStatus.color}`}>
                 {regStatus.label}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500">Ngày đăng ký</span>
+              <span className="text-slate-500">{t('attendee_dashboard.modal.reg_date_label', 'Ngày đăng ký')}</span>
               <span className="font-medium text-slate-700">{registeredAt}</span>
             </div>
             {event.organizer?.name && (
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500">Ban tổ chức</span>
+                <span className="text-slate-500">{t('attendee_dashboard.modal.organizer_label', 'Ban tổ chức')}</span>
                 <span className="font-medium text-slate-700">{event.organizer.name}</span>
               </div>
             )}
           </div>
 
           {/* Nút đóng & huỷ */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 w-full">
             {isCancellable && (registration.status === 'approved' || registration.status === 'pending') && (
               <button
                 onClick={handleCancel}
                 disabled={cancelling}
                 className="w-full rounded-2xl bg-rose-50 border border-rose-200 py-3 text-sm font-semibold text-rose-600 hover:bg-rose-100 transition-colors disabled:opacity-50"
               >
-                {cancelling ? 'Đang huỷ...' : 'Huỷ đăng ký'}
+                {cancelling ? t('attendee_dashboard.modal.cancelling', 'Đang huỷ...') : t('attendee_dashboard.modal.cancel_btn', 'Huỷ đăng ký')}
               </button>
             )}
             <button
               onClick={onClose}
               className="w-full rounded-2xl bg-slate-100 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-200 transition-colors"
             >
-              Đóng
+              {t('attendee_dashboard.modal.close', 'Đóng')}
             </button>
           </div>
         </div>

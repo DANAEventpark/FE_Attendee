@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { FaArrowRight } from "react-icons/fa";
 import api from "../../services/api"; 
 
@@ -24,6 +25,7 @@ const heroPosters = [
 ];
 
 export default function Hero() {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     total_events: 0,
     total_registrations: 0,
@@ -51,45 +53,44 @@ export default function Hero() {
       <div className="mx-auto grid max-w-6xl gap-12 px-4 pt-6 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div className="max-w-2xl">
           <span className="inline-flex rounded-full bg-[#f06f58] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white">
-            Nền tảng sự kiện cộng đồng
+            {t('hero.eyebrow')}
           </span>
 
           <h1 className="mt-6 text-4xl font-bold leading-tight sm:text-5xl">
-            Khám phá sự kiện
+            {t('hero.title_1')}
             <br />
-            xung quanh bạn
+            {t('hero.title_2')}
           </h1>
 
           <p className="mt-5 max-w-xl text-base leading-7 text-white/72 sm:text-lg">
-            Từ âm nhạc, workshop đến hoạt động cộng đồng, mọi trải nghiệm nổi bật
-            đều được gom lại để bạn dễ chọn và dễ tham gia.
+            {t('hero.description')}
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <button className="inline-flex items-center gap-2 rounded-2xl bg-[#e96a52] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#e96a52]/25 transition hover:bg-[#d75c46]">
-              Khám phá ngay
+              {t('hero.explore_now')}
               <FaArrowRight className="text-xs" />
             </button>
 
             <p className="text-sm text-white/60">
-              {stats.total_events} sự kiện đang mở đăng ký
+              {t('hero.events_open_registration', { count: stats.total_events })}
             </p>
           </div>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
               <p className="text-3xl font-bold text-white">{stats.total_events}</p>
-              <p className="mt-2 text-sm text-white/60">Sự kiện đang mở</p>
+              <p className="mt-2 text-sm text-white/60">{t('hero.active_events')}</p>
             </div>
 
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
               <p className="text-3xl font-bold text-white">{stats.total_registrations}</p>
-              <p className="mt-2 text-sm text-white/60">Lượt đăng ký tham gia</p>
+              <p className="mt-2 text-sm text-white/60">{t('hero.registrations')}</p>
             </div>
 
             <div className="rounded-[24px] border border-white/12 bg-white/6 p-5 backdrop-blur-sm">
               <p className="text-3xl font-bold text-white">{stats.total_organizers}</p>
-              <p className="mt-2 text-sm text-white/60">Nhà tổ chức đồng hành</p>
+              <p className="mt-2 text-sm text-white/60">{t('hero.organizers')}</p>
             </div>
           </div>
         </div>
@@ -107,18 +108,20 @@ export default function Hero() {
 
               <div className="relative">
                 <p className="text-2xl font-semibold italic leading-none">
-                  {poster.eyebrow}
+                  {t(`hero.posters.${index}.eyebrow`, poster.eyebrow)}
                 </p>
               </div>
 
               <div className="relative">
                 <p className="text-xs uppercase tracking-[0.3em] text-white/70">
-                  Feature highlight
+                  {t('hero.feature_highlight', 'Feature highlight')}
                 </p>
                 <h2 className="mt-3 text-3xl font-bold leading-tight">
-                  {poster.title}
+                  {t(`hero.posters.${index}.title`, poster.title)}
                 </h2>
-                <p className="mt-3 text-sm text-white/75">{poster.subtitle}</p>
+                <p className="mt-3 text-sm text-white/75">
+                  {t(`hero.posters.${index}.subtitle`, poster.subtitle)}
+                </p>
               </div>
             </article>
           ))}
