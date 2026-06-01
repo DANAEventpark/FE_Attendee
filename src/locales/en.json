@@ -245,5 +245,11 @@
     "error_password_required": "Please enter password",
     "error_password_min": "Password must be at least 8 characters",
     "error_fallback": "Registration failed. Please try again."
+  },
+  "event_card": {
+    "published": "Published",
+    "draft": "Draft",
+    "done": "Done",
+    "cancelled": "Cancelled"
   }
 }

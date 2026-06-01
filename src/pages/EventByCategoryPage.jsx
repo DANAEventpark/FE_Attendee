@@ -79,7 +79,7 @@ const EventByCategoryPage = () => {
                                 <div>
                                     {/* Badge Trạng thái */}
                                     <div className="absolute top-4 right-4 bg-[#2d3e50]/10 text-[#2d3e50] font-bold text-xs px-2.5 py-1 rounded-full uppercase tracking-wider">
-                                        {event.status === 'published' ? t('event_card.published', 'Đang mở') : event.status}
+                                        {t(`event_card.${event.status}`, event.status === 'published' ? 'Đang mở' : event.status)}
                                     </div>
                                     
                                     {/* Thông tin sự kiện */}

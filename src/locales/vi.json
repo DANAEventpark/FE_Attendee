@@ -245,5 +245,11 @@
     "error_password_required": "Vui lòng nhập mật khẩu",
     "error_password_min": "Mật khẩu tối thiểu 8 ký tự",
     "error_fallback": "Đăng ký thất bại. Vui lòng thử lại."
+  },
+  "event_card": {
+    "published": "Đang mở",
+    "draft": "Nháp",
+    "done": "Đã kết thúc",
+    "cancelled": "Đã hủy"
   }
 }
