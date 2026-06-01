@@ -30,6 +30,12 @@ const EventByCategoryPage = () => {
         fetchEvents();
     }, [id]);
 
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(typeof dateString === 'string' ? dateString.replace(/-/g, '/') : dateString);
+        return date.toLocaleString(i18n.language === 'en' ? 'en-US' : 'vi-VN');
+    };
+
     if (loading) {
         return (
             <div className="bg-[#fdf5e6] min-h-screen flex items-center justify-center font-sans">
@@ -62,20 +68,23 @@ const EventByCategoryPage = () => {
                         <p className="text-gray-500 text-lg">{t('event_by_category.empty', 'Hiện tại chưa có sự kiện nào diễn ra trong danh mục này.')}</p>
                     </div>
                 ) : (
-                    /* CHIA 3 CỘT Ở ĐÂY: 1 cột trên mobile, 2 cột trên tablet, và chuẩn 3 cột trên máy tính (md:grid-cols-3) */
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {events.map((event) => (
-                            <div className="bg-white border border-[#e2e8f0] rounded-2xl p-6 shadow-xs relative overflow-hidden flex flex-col justify-between" key={event.id}>
+                            <Link 
+                                to={`/events/${event.id}`} 
+                                key={event.id}
+                                className="bg-white border border-[#e2e8f0] rounded-2xl p-6 shadow-xs relative overflow-hidden flex flex-col justify-between group hover:-translate-y-1 hover:shadow-md transition-all duration-300"
+                            >
                                 
                                 <div>
                                     {/* Badge Trạng thái */}
                                     <div className="absolute top-4 right-4 bg-[#2d3e50]/10 text-[#2d3e50] font-bold text-xs px-2.5 py-1 rounded-full uppercase tracking-wider">
-                                        {event.status}
+                                        {event.status === 'published' ? t('event_card.published', 'Đang mở') : event.status}
                                     </div>
                                     
                                     {/* Thông tin sự kiện */}
                                     <div className="mt-4">
-                                        <h3 className="text-[#2d3e50] text-xl font-bold mb-2 line-clamp-1">{event.title}</h3>
+                                        <h3 className="text-[#2d3e50] text-xl font-bold mb-2 line-clamp-1 group-hover:text-[#1a2633] transition-colors">{event.title}</h3>
                                         <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">{event.description}</p>
                                     </div>
                                 </div>
@@ -83,11 +92,11 @@ const EventByCategoryPage = () => {
                                 {/* Chi tiết Meta ở dưới cùng card */}
                                 <div className="border-t border-gray-100 pt-4 space-y-1.5 text-xs text-gray-500">
                                     <p>📍 <strong className="text-gray-700">{t('event_by_category.location', 'Địa điểm')}:</strong> {event.location}</p>
-                                    <p>📅 <strong className="text-gray-700">{t('event_by_category.time', 'Thời gian')}:</strong> {new Date(typeof event.start_time === 'string' ? event.start_time.replace(/-/g, '/') : event.start_time).toLocaleString(i18n.language === 'en' ? 'en-US' : 'vi-VN')}</p>
+                                    <p>📅 <strong className="text-gray-700">{t('event_by_category.time', 'Thời gian')}:</strong> {formatDate(event.start_time)}</p>
                                     <p>👥 <strong className="text-gray-700">{t('event_by_category.capacity', 'Giới hạn')}:</strong> {event.capacity} {t('event_by_category.people', 'người')}</p>
                                 </div>
 
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}
