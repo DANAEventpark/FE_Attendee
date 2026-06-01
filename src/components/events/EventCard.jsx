@@ -1,3 +1,4 @@
+import { useMemo, useCallback } from 'react'
 import {
   FaCalendarAlt,
   FaMapMarkerAlt,
@@ -36,22 +37,22 @@ export default function EventCard({ event }) {
   const currentLang = i18n.language
 
   const dateLang = currentLang === 'en' ? 'en-US' : 'vi-VN'
-  const dateFormatter = new Intl.DateTimeFormat(dateLang, {
+  const dateFormatter = useMemo(() => new Intl.DateTimeFormat(dateLang, {
     day: '2-digit',
     month: 'short',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  })
+  }), [dateLang])
 
-  const formatDate = (dateValue) => {
+  const formatDate = useCallback((dateValue) => {
     if (!dateValue) return t('event.updating', 'Đang cập nhật')
     const date = new Date(typeof dateValue === 'string' ? dateValue.replace(/-/g, '/') : dateValue)
     if (Number.isNaN(date.getTime())) return t('event.updating', 'Đang cập nhật')
     return dateFormatter.format(date)
-  }
+  }, [t, dateFormatter])
 
-  const formatDateRange = (startTime, endTime) => {
+  const formatDateRange = useCallback((startTime, endTime) => {
     if (!startTime) return t('event.updating_schedule', 'Đang cập nhật lịch trình')
     const start = new Date(typeof startTime === 'string' ? startTime.replace(/-/g, '/') : startTime)
     const end = endTime ? new Date(typeof endTime === 'string' ? endTime.replace(/-/g, '/') : endTime) : null
@@ -73,7 +74,7 @@ export default function EventCard({ event }) {
     }
 
     return `${startLabel} - ${dateFormatter.format(end)}`
-  }
+  }, [t, dateFormatter, dateLang])
 
   const displayImage = event.category?.image ? getCategoryImage(event.category.image) : heroFallback
   const categoryName = event.category?.name ? t('category.' + event.category.name, event.category.name) : t('category.default_category', 'Sự kiện')

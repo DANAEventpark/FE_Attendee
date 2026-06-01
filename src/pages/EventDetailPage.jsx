@@ -24,10 +24,19 @@ const getCategoryImage = (imageName) => {
 };
 
 const getCategoryColor = (categoryName) => {
-    // Figma shows orange for 'Âm nhạc' (Music)
     if (categoryName === 'Music' || categoryName === 'Âm nhạc') return 'bg-[#F05A4A] text-white';
-    return 'bg-[#BCE2CD] text-slate-800'; // Default mint badge
+    return 'bg-[#BCE2CD] text-slate-800'; 
 };
+
+// Generate Initials outside component
+const getInitials = (name) => {
+    if (!name) return 'U';
+    const parts = name.split(' ');
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+};
+
+const avatarColors = ['#fca5a5', '#60a5fa', '#c084fc', '#fcd34d'];
 
 const EventDetailPage = () => {
     const { id } = useParams();
@@ -143,21 +152,9 @@ const EventDetailPage = () => {
         : false;
     
     const registeredCount = event.registrations ? event.registrations.length : 0;
-    const remainingSpots = event.capacity - registeredCount;
+    const remainingSpots = Math.max(0, event.capacity - registeredCount);
 
-    // Generate Initials
-    const getInitials = (name) => {
-        if (!name) return 'U';
-        const parts = name.split(' ');
-        if (parts.length >= 2) return (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
-        return name.substring(0, 2).toUpperCase();
-    };
-
-    const avatarColors = ['#fca5a5', '#60a5fa', '#c084fc', '#fcd34d'];
-
-    // Registration and Rating Computations
-    const isRegistered = event && event.registrations && user && 
-        event.registrations.some(reg => String(reg.user?.id || '') === String(user.id));
+    const isRegistered = !!userRegistration;
 
     const reviewsCount = event && event.reviews ? event.reviews.length : 0;
     const avgRating = event && event.reviews && reviewsCount > 0 
