@@ -87,6 +87,27 @@ const EventDetailPage = () => {
         }
     };
 
+    const handleCancel = async () => {
+        if (!window.confirm(t('event_detail.cancel_confirm', 'Bạn có chắc chắn muốn hủy đăng ký sự kiện này không?'))) {
+            return;
+        }
+        setRegistering(true);
+        try {
+            if (!token) {
+                alert(t('event_detail.login_required_alert', "Vui lòng đăng nhập để thao tác!"));
+                setRegistering(false);
+                return;
+            }
+            const response = await api.post(`/events/${id}/cancel`, {});
+            alert(response.data.message || t('event_detail.cancel_success', "Hủy đăng ký thành công!"));
+            await fetchEvent();
+        } catch (error) {
+            alert(error.response?.data?.message || t('event_detail.general_error_alert', "Đã có lỗi xảy ra"));
+        } finally {
+            setRegistering(false);
+        }
+    };
+
     const handleSubmitReview = async () => {
         if (rating === 0 || !comment.trim()) {
             alert(t('event_detail.comment_empty_alert', "Vui lòng chọn số sao và nhập nội dung bình luận!"));
