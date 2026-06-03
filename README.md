@@ -1,16 +1,46 @@
-# React + Vite
+# DANAEventpark - Attendee Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This repository contains the Frontend application specifically designed for **Attendees** of DANAEventpark. It provides a seamless interface for users to browse events, purchase tickets, and manage their profiles.
 
-Currently, two official plugins are available:
+## 🚀 Tech Stack
+- **Library:** React (v19)
+- **Build Tool:** Vite
+- **Styling:** TailwindCSS (v4)
+- **State Management:** Zustand
+- **Routing:** React Router DOM
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 📁 Key Directories
+- `src/components`: Reusable UI components.
+- `src/pages`: Main view components for different routes.
+- `src/assets`: Static assets like images and global styles.
 
-## React Compiler
+## 🛠️ Local Development Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **Install Dependencies**
+   Ensure you have Node.js installed, then run:
+   ```bash
+   npm install
+   ```
 
-## Expanding the ESLint configuration
+2. **Environment Configuration**
+   Copy the environment example file:
+   ```bash
+   cp .env.example .env
+   ```
+   *Update the `.env` file to include the correct Backend API URL (e.g., `VITE_API_BASE_URL=http://127.0.0.1:8000`).*
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+3. **Start the Development Server**
+   ```bash
+   npm run dev
+   ```
+   The application will run on `http://localhost:5173` (or another port specified by Vite in the terminal).
+
+## 📦 Build for Production
+To build the app for production deployment, run:
+```bash
+npm run build
+```
+The optimized production files will be generated in the `dist` directory. You can preview the production build locally using:
+```bash
+npm run preview
+```
