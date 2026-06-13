@@ -36,6 +36,13 @@ const getInitials = (name) => {
     return name.substring(0, 2).toUpperCase();
 };
 
+const getAvatarUrl = (avatarPath) => {
+    if (!avatarPath) return null;
+    if (avatarPath.startsWith('http')) return avatarPath;
+    const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace('/api', '') : 'http://localhost:8000';
+    return `${baseUrl}/storage/${avatarPath}`;
+};
+
 const avatarColors = ['#fca5a5', '#60a5fa', '#c084fc', '#fcd34d'];
 
 const EventDetailPage = () => {
@@ -68,6 +75,18 @@ const EventDetailPage = () => {
     useEffect(() => {
         fetchEvent();
     }, [fetchEvent]);
+
+    // Real-time comments (Polling)
+    useEffect(() => {
+        if (!event || !event.id) return;
+        
+        // Gọi API fetchEvent mỗi 3 giây
+        const intervalId = setInterval(() => {
+            fetchEvent();
+        }, 3000);
+
+        return () => clearInterval(intervalId);
+    }, [event?.id, fetchEvent]);
 
     const handleRegister = async () => {
         setRegistering(true);
@@ -266,9 +285,18 @@ const EventDetailPage = () => {
                                 <div className="flex items-center">
                                     <div className="flex -space-x-3">
                                         {event.registrations && event.registrations.slice(0, 5).map((reg, idx) => (
-                                            <div key={idx} className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-slate-800" style={{ backgroundColor: avatarColors[idx % avatarColors.length] }}>
-                                                {getInitials(reg.user.name)}
-                                            </div>
+                                            reg.user?.avatar ? (
+                                                <img 
+                                                    key={idx} 
+                                                    src={getAvatarUrl(reg.user.avatar)} 
+                                                    alt={reg.user.name} 
+                                                    className="w-10 h-10 rounded-full border-2 border-white object-cover" 
+                                                />
+                                            ) : (
+                                                <div key={idx} className="w-10 h-10 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-slate-800" style={{ backgroundColor: avatarColors[idx % avatarColors.length] }}>
+                                                    {getInitials(reg.user?.name)}
+                                                </div>
+                                            )
                                         ))}
                                         {registeredCount > 5 && (
                                             <div className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-bold text-slate-800">
@@ -355,9 +383,17 @@ const EventDetailPage = () => {
                                 {event.reviews && event.reviews.length > 0 ? (
                                     event.reviews.map((rev, idx) => (
                                         <div key={idx} className="flex gap-4">
-                                            <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-slate-800 shrink-0" style={{ backgroundColor: avatarColors[idx % avatarColors.length] }}>
-                                                {getInitials(rev.user?.name)}
-                                            </div>
+                                            {rev.user?.avatar ? (
+                                                <img 
+                                                    src={getAvatarUrl(rev.user.avatar)} 
+                                                    alt={rev.user.name} 
+                                                    className="w-10 h-10 rounded-full object-cover shrink-0" 
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-slate-800 shrink-0" style={{ backgroundColor: avatarColors[idx % avatarColors.length] }}>
+                                                    {getInitials(rev.user?.name)}
+                                                </div>
+                                            )}
                                             <div>
                                                 <div className="flex items-center gap-2 mb-1">
                                                     <h4 className="font-semibold text-slate-800">{rev.user?.name || t('event_detail.modal.unknown', 'Người dùng')}</h4>
@@ -388,8 +424,12 @@ const EventDetailPage = () => {
                             <div className="space-y-4 mb-8">
                                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                                     <span className="text-gray-500 text-sm">{t('event_detail.status_label', 'Trạng thái sự kiện:')}</span>
-                                    <span className="text-green-600 font-semibold">
-                                        {event.status === 'published' ? t('event_detail.status_open', 'Đang mở đăng ký') : t('event_detail.status_closed', 'Chưa mở')}
+                                    <span className={`font-semibold ${event.status === 'done' ? 'text-gray-500' : 'text-green-600'}`}>
+                                        {event.status === 'published' 
+                                            ? t('event_detail.status_open', 'Đang mở đăng ký') 
+                                            : event.status === 'done' 
+                                                ? t('event_detail.status_done', 'Đã kết thúc') 
+                                                : t('event_detail.status_closed', 'Chưa mở')}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
