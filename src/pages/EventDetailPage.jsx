@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '@/services/api';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
+import RegistrationTypeModal from '@/components/common/RegistrationTypeModal';
 import artImg from '@/assets/art.jpg';
 import communityImg from '@/assets/community.jpg';
 import educationImg from '@/assets/education.jpg';
@@ -58,6 +59,7 @@ const EventDetailPage = () => {
     const [registering, setRegistering] = useState(false);
     const [submittingReview, setSubmittingReview] = useState(false);
     const [error, setError] = useState(null);
+    const [showRegModal, setShowRegModal] = useState(false);
 
     const fetchEvent = useCallback(async () => {
         try {
@@ -88,19 +90,36 @@ const EventDetailPage = () => {
         return () => clearInterval(intervalId);
     }, [event?.id, fetchEvent]);
 
-    const handleRegister = async () => {
+    // Mở modal chọn hình thức đăng ký
+    const handleRegister = () => {
+        if (!token) {
+            alert(t('event_detail.login_required_alert', "Vui lòng đăng nhập để đăng ký tham gia!"));
+            return;
+        }
+        setShowRegModal(true);
+    };
+
+    // Callback từ modal — seats = 1 (cá nhân) hoặc n (tổ chức)
+    const handleModalConfirm = async (seats) => {
         setRegistering(true);
         try {
-            if (!token) {
-                alert(t('event_detail.login_required_alert', "Vui lòng đăng nhập để đăng ký tham gia!"));
-                setRegistering(false);
-                return;
-            }
-            const response = await api.post(`/events/${id}/register`, {});
+            const response = await api.post(`/events/${id}/register`, { seats });
+            setShowRegModal(false);
             alert(response.data.message || t('event_detail.success_alert', "Đăng ký thành công!"));
             await fetchEvent();
-        } catch (error) {
-            alert(error.response?.data?.message || t('event_detail.general_error_alert', "Đã có lỗi xảy ra"));
+        } catch (err) {
+            const data = err.response?.data;
+            // HTTP 409 = cảnh báo trùng thời gian
+            if (err.response?.status === 409 && data?.warning) {
+                const conflict = data.conflicting_event;
+                const msg = data.message
+                    + (conflict
+                        ? `\n\nSự kiện xung đột: "${conflict.title}"\nTừ ${conflict.start_time} đến ${conflict.end_time}`
+                        : '');
+                alert('⚠️ ' + msg);
+            } else {
+                alert(data?.message || t('event_detail.general_error_alert', "Đã có lỗi xảy ra"));
+            }
         } finally {
             setRegistering(false);
         }
@@ -193,6 +212,12 @@ const EventDetailPage = () => {
     
     const registeredCount = event.registrations ? event.registrations.length : 0;
     const remainingSpots = Math.max(0, event.capacity - registeredCount);
+    // Tổng số ghế đã được approved (dùng cho modal)
+    const approvedSeats = event.registrations
+        ? event.registrations
+            .filter(r => r.status === 'approved')
+            .reduce((sum, r) => sum + (r.seats || 1), 0)
+        : 0;
 
     const isRegistered = !!userRegistration;
 
@@ -203,6 +228,15 @@ const EventDetailPage = () => {
 
     return (
         <div className="min-h-screen bg-[#EBEFEA] font-sans">
+            {/* Modal chọn hình thức đăng ký */}
+            <RegistrationTypeModal
+                isOpen={showRegModal}
+                onClose={() => setShowRegModal(false)}
+                onConfirm={handleModalConfirm}
+                eventCapacity={event.capacity}
+                approvedSeats={approvedSeats}
+                isSubmitting={registering}
+            />
             {/* Top Navigation Bar / Banner Area */}
             <div className="relative w-full h-[300px] md:h-[400px]">
                 <img src={bannerImg} alt="Event Banner" className="w-full h-full object-cover" />
