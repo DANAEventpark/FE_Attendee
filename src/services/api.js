@@ -4,14 +4,9 @@ import useAuthStore from '@/store/authStore'
 /**
  * Axios Instance — FE_Attendee
  * Cấu hình HTTP client gọi đến Laravel API (BE_DANAEventpark)
- *
- * Features:
- *  - baseURL trỏ đến BE Laravel port 8000
- *  - Request interceptor: tự động gắn JWT token vào header
- *  - Response interceptor: tự động logout khi nhận lỗi 401
  */
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -20,32 +15,38 @@ const api = axios.create({
 })
 
 // ─── Request Interceptor ───────────────────────────────────────────────────
-// Tự động đính kèm JWT token vào mỗi request
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().token
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    
-    // Get current language from localStorage
+
     const lang = localStorage.getItem('i18nextLng') || 'vi'
     if (config.headers) {
       config.headers['Accept-Language'] = lang
     }
-    
+
     return config
   },
   (error) => Promise.reject(error)
 )
 
 // ─── Response Interceptor ──────────────────────────────────────────────────
-// Xử lý lỗi toàn cục: 401 → tự động logout
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token hết hạn hoặc không hợp lệ → xoá auth và redirect login
+    const requestUrl = error.config?.url || ''
+    const isAuthEndpoint =
+      requestUrl.includes('/auth/login') ||
+      requestUrl.includes('/auth/google') ||
+      requestUrl.includes('/auth/register')
+
+    if (
+      error.response?.status === 401 &&
+      !isAuthEndpoint &&
+      window.location.pathname !== '/login'
+    ) {
       useAuthStore.getState().clearAuth()
       window.location.href = '/login'
     }

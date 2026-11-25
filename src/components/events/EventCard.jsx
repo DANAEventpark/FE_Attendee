@@ -80,7 +80,7 @@ export default function EventCard({ event }) {
   const categoryName = event.category?.name ? t('category.' + event.category.name, event.category.name) : t('category.default_category', 'Sự kiện')
   const rating = Number(event.reviews_avg_rating ?? 0)
   const totalSlots = event.capacity ?? 0
-  const registeredCount = event.confirmed_registrations_count ?? 0
+  const registeredCount = Number(event.confirmed_seats_count ?? event.confirmed_registrations_count ?? 0)
   const remainingSlots = Math.max(0, totalSlots - registeredCount)
 
   return (
