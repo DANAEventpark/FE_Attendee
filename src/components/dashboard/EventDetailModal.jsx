@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X, Calendar, Clock, MapPin, AlertTriangle, Users, Tag, User } from 'lucide-react'
+import { X, Calendar, Clock, MapPin, AlertTriangle } from 'lucide-react'
 import { cancelRegistration } from '@/services/registrationService'
 import { useTranslation } from 'react-i18next'
 import artImg from '@/assets/art.jpg'
@@ -56,6 +56,7 @@ const formatTime = (dateStr) => {
 
 export default function EventDetailModal({ registration, isOpen, onClose, tab, onCancelSuccess }) {
   const [cancelling, setCancelling] = useState(false)
+  const [currentTime] = useState(() => Date.now())
   const { t, i18n } = useTranslation()
   if (!isOpen || !registration) return null
 
@@ -67,7 +68,6 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab, o
   const isEventCancelledByOrganizer = event.status === 'cancelled'
 
   const startDate = formatDateFull(event.start_time, i18n.language)
-  const endDate   = formatDateFull(event.end_time, i18n.language)
   const startTime = formatTime(event.start_time)
   const endTime   = formatTime(event.end_time)
 
@@ -83,7 +83,7 @@ export default function EventDetailModal({ registration, isOpen, onClose, tab, o
     : t('attendee_dashboard.modal.unknown', 'Không rõ')
 
   const deadlineDate = event.registration_deadline ? new Date(typeof event.registration_deadline === 'string' ? event.registration_deadline.replace(/-/g, '/') : event.registration_deadline) : null;
-  const isCancellable = deadlineDate && !Number.isNaN(deadlineDate.getTime()) ? Date.now() < deadlineDate.getTime() : false;
+  const isCancellable = deadlineDate && !Number.isNaN(deadlineDate.getTime()) ? currentTime < deadlineDate.getTime() : false;
 
   const handleCancel = async () => {
     if (!confirm('Bạn có chắc chắn muốn huỷ đăng ký sự kiện này?')) return;

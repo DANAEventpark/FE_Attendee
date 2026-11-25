@@ -50,9 +50,11 @@ const EventDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
-    const { user, token } = useAuthStore();
+    const { token } = useAuthStore();
+    const [currentTime] = useState(() => Date.now());
     const [event, setEvent] = useState(null);
     const [userRegistration, setUserRegistration] = useState(null);
+    const [userReview, setUserReview] = useState(null);
     const [loading, setLoading] = useState(true);
     const [comment, setComment] = useState('');
     const [rating, setRating] = useState(0);
@@ -61,12 +63,14 @@ const EventDetailPage = () => {
     const [error, setError] = useState(null);
     const [showRegModal, setShowRegModal] = useState(false);
 
-    const fetchEvent = useCallback(async () => {
+    const fetchEvent = useCallback(async (signal) => {
         try {
-            const response = await api.get(`/events/${id}`);
+            const response = await api.get(`/events/${id}`, { signal });
             setEvent(response.data.data);
             setUserRegistration(response.data.user_registration || null);
+            setUserReview(response.data.user_review || null);
         } catch (err) {
+            if (err.name === 'CanceledError' || err.name === 'AbortError') return;
             console.error("Error fetching event details", err);
             setError(err.response?.data?.message || t('event_detail.error_loading', "Không thể tải dữ liệu sự kiện."));
         } finally {
@@ -75,20 +79,25 @@ const EventDetailPage = () => {
     }, [id, t]);
 
     useEffect(() => {
-        fetchEvent();
+        const controller = new AbortController();
+        fetchEvent(controller.signal);
+        return () => controller.abort();
     }, [fetchEvent]);
 
-    // Real-time comments (Polling)
+    // Real-time comments — polling mỗi 5 giây với AbortController
     useEffect(() => {
-        if (!event || !event.id) return;
-        
-        // Gọi API fetchEvent mỗi 3 giây
-        const intervalId = setInterval(() => {
-            fetchEvent();
-        }, 3000);
+        if (!event?.id) return;
 
-        return () => clearInterval(intervalId);
-    }, [event?.id, fetchEvent]);
+        const controller = new AbortController();
+        const intervalId = setInterval(() => {
+            fetchEvent(controller.signal);
+        }, 5000);
+
+        return () => {
+            clearInterval(intervalId);
+            controller.abort();
+        };
+    }, [event?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Mở modal chọn hình thức đăng ký
     const handleRegister = () => {
@@ -129,13 +138,12 @@ const EventDetailPage = () => {
         if (!window.confirm(t('event_detail.cancel_confirm', 'Bạn có chắc chắn muốn hủy đăng ký sự kiện này không?'))) {
             return;
         }
+        if (!token) {
+            alert(t('event_detail.login_required_alert', "Vui lòng đăng nhập để thao tác!"));
+            return;
+        }
         setRegistering(true);
         try {
-            if (!token) {
-                alert(t('event_detail.login_required_alert', "Vui lòng đăng nhập để thao tác!"));
-                setRegistering(false);
-                return;
-            }
             const response = await api.post(`/events/${id}/cancel`, {});
             alert(response.data.message || t('event_detail.cancel_success', "Hủy đăng ký thành công!"));
             await fetchEvent();
@@ -147,8 +155,9 @@ const EventDetailPage = () => {
     };
 
     const handleSubmitReview = async () => {
-        if (rating === 0 || !comment.trim()) {
-            alert(t('event_detail.comment_empty_alert', "Vui lòng chọn số sao và nhập nội dung bình luận!"));
+        // BUG-021 Fix: Comment là optional — chỉ bắt buộc chọn sao
+        if (rating === 0) {
+            alert(t('event_detail.rating_empty_alert', "Vui lòng chọn số sao để đánh giá!"));
             return;
         }
         
@@ -180,7 +189,9 @@ const EventDetailPage = () => {
     if (error) return <div className="min-h-screen flex items-center justify-center bg-[#fdfaf2] text-red-500 font-medium">{error}</div>;
     if (!event) return <div className="min-h-screen flex items-center justify-center bg-[#fdfaf2]">{t('event_detail.not_found', 'Event not found')}</div>;
 
-    const bannerImg = event.category ? getCategoryImage(event.category.image) : musicImg;
+    const bannerImg = event.image 
+        ? (event.image.startsWith('http') ? event.image : `http://127.0.0.1:8000/storage/${event.image.replace(/^\//, '')}`)
+        : (event.category ? getCategoryImage(event.category.image) : musicImg);
     const catName = event.category ? event.category.name : 'Sự kiện';
     
     const startDate = new Date(typeof event.start_time === 'string' ? event.start_time.replace(/-/g, '/') : event.start_time);
@@ -204,22 +215,29 @@ const EventDetailPage = () => {
         startDate.getMonth() === endDate.getMonth() &&
         startDate.getDate() === endDate.getDate();
 
-    const isEnded = endDate && !Number.isNaN(endDate.getTime()) ? Date.now() > endDate.getTime() : false;
+    const isEnded = endDate && !Number.isNaN(endDate.getTime()) ? currentTime > endDate.getTime() : false;
 
     const isCancellable = deadlineDate && !Number.isNaN(deadlineDate.getTime()) 
-        ? Date.now() < deadlineDate.getTime()
+        ? currentTime < deadlineDate.getTime()
+        : false;
+
+    const isPastDeadline = deadlineDate && !Number.isNaN(deadlineDate.getTime())
+        ? currentTime > deadlineDate.getTime()
         : false;
     
+    // BUG-007 Fix: Hiển thị đúng trạng thái cancelled
+    const isCancelled = event.status === 'cancelled';
+
     const registeredCount = event.registrations ? event.registrations.length : 0;
-    const remainingSpots = Math.max(0, event.capacity - registeredCount);
     // Tổng số ghế đã được approved (dùng cho modal)
     const approvedSeats = event.registrations
         ? event.registrations
             .filter(r => r.status === 'approved')
             .reduce((sum, r) => sum + (r.seats || 1), 0)
         : 0;
+    const remainingSpots = Math.max(0, event.capacity - approvedSeats);
 
-    const isRegistered = !!userRegistration;
+    const canReview = userRegistration && userRegistration.status === 'approved';
 
     const reviewsCount = event && event.reviews ? event.reviews.length : 0;
     const avgRating = event && event.reviews && reviewsCount > 0 
@@ -364,7 +382,7 @@ const EventDetailPage = () => {
                                     <p className="text-slate-600 font-medium mb-3">{t('event_detail.comment_login_prompt', 'Vui lòng đăng nhập để bình luận và đánh giá sự kiện.')}</p>
                                     <button onClick={() => navigate('/login')} className="bg-slate-800 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:bg-slate-700 transition">{t('event_detail.login_now', 'Đăng nhập ngay')}</button>
                                 </div>
-                            ) : !isRegistered ? (
+                            ) : !canReview ? (
                                 <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 text-center mb-8">
                                     <svg className="w-8 h-8 text-amber-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -380,6 +398,11 @@ const EventDetailPage = () => {
                                     <p className="text-blue-800 font-semibold mb-1">Sự kiện chưa kết thúc</p>
                                     <p className="text-blue-700 text-sm">Bạn chỉ có thể gửi đánh giá và bình luận sau khi sự kiện này đã chính thức kết thúc.</p>
                                 </div>
+                            ) : userReview ? (
+                                <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center mb-8">
+                                    <p className="text-emerald-800 font-semibold mb-1">Bạn đã đánh giá sự kiện này</p>
+                                    <p className="text-emerald-700 text-sm">Mỗi tài khoản chỉ được gửi đánh giá 1 lần cho mỗi sự kiện.</p>
+                                </div>
                             ) : (
                                 <>
                                     {/* Star Rating Selection */}
@@ -393,13 +416,20 @@ const EventDetailPage = () => {
                                         ))}
                                     </div>
                                     
-                                    <textarea 
-                                        value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
-                                        placeholder={t('event_detail.comment_placeholder', 'Nhập bình luận của bạn...')}
-                                        className="w-full border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#BCE2CD] resize-none mb-4"
-                                        rows="3"
-                                    ></textarea>
+                                    {/* BUG-018 Fix: Thêm bộ đếm ký tự 0/300 */}
+                                    <div className="relative mb-4">
+                                        <textarea 
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value.slice(0, 300))}
+                                            placeholder={t('event_detail.comment_placeholder', 'Nhập bình luận của bạn... (không bắt buộc)')}
+                                            className="w-full border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-[#BCE2CD] resize-none"
+                                            rows="3"
+                                            maxLength={300}
+                                        ></textarea>
+                                        <span className={`absolute bottom-2 right-3 text-xs font-medium ${comment.length >= 280 ? 'text-red-500' : 'text-gray-400'}`}>
+                                            {comment.length}/300
+                                        </span>
+                                    </div>
                                     <div className="flex justify-end">
                                         <button 
                                             onClick={handleSubmitReview}
@@ -458,14 +488,31 @@ const EventDetailPage = () => {
                             <div className="space-y-4 mb-8">
                                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                                     <span className="text-gray-500 text-sm">{t('event_detail.status_label', 'Trạng thái sự kiện:')}</span>
-                                    <span className={`font-semibold ${event.status === 'done' ? 'text-gray-500' : 'text-green-600'}`}>
-                                        {event.status === 'published' 
-                                            ? t('event_detail.status_open', 'Đang mở đăng ký') 
-                                            : event.status === 'done' 
-                                                ? t('event_detail.status_done', 'Đã kết thúc') 
-                                                : t('event_detail.status_closed', 'Chưa mở')}
+                                    {/* BUG-007 Fix: Đồng nhất label trạng thái với nút đăng ký (bao gồm quá hạn & đã hủy) */}
+                                    <span className={`font-semibold ${
+                                        isCancelled ? 'text-red-600' :
+                                        event.status === 'done' ? 'text-gray-500' :
+                                        event.status === 'published'
+                                            ? (isPastDeadline ? 'text-gray-500' : 'text-green-600')
+                                            : 'text-orange-500'
+                                    }`}>
+                                        {isCancelled
+                                            ? t('event_detail.status_cancelled_event', 'Sự kiện đã bị hủy')
+                                            : event.status === 'done'
+                                                ? t('event_detail.status_done', 'Đã kết thúc')
+                                                : event.status === 'published'
+                                                    ? (isPastDeadline
+                                                        ? t('event_detail.register_closed', 'Hết hạn đăng ký')
+                                                        : t('event_detail.status_open', 'Đang mở đăng ký'))
+                                                    : t('event_detail.status_closed', 'Chưa mở')}
                                     </span>
                                 </div>
+                                {/* BUG-017 Fix: Hiển thị lý do hủy nếu có */}
+                                {isCancelled && event.cancel_reason && (
+                                    <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700">
+                                        <span className="font-semibold">Lý do hủy: </span>{event.cancel_reason}
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-center border-b border-gray-100 pb-4">
                                     <span className="text-gray-500 text-sm">
                                         {t('event_detail.capacity', { capacity: event.capacity })}
@@ -500,7 +547,7 @@ const EventDetailPage = () => {
                                 )}
                             </div>
                             
-                            {userRegistration ? (
+                            {userRegistration && userRegistration.status !== 'cancelled' ? (
                                 <div className="space-y-3">
                                     <button 
                                         disabled={true}
@@ -508,9 +555,8 @@ const EventDetailPage = () => {
                                     >
                                         {userRegistration.status === 'approved' && t('event_detail.registered_approved', 'Đã đăng ký chính thức')}
                                         {userRegistration.status === 'pending' && t('event_detail.registered_pending', 'Đang ở hàng chờ')}
-                                        {userRegistration.status === 'cancelled' && t('event_detail.registered_cancelled', 'Đăng ký đã bị hủy')}
                                     </button>
-                                    {userRegistration.status !== 'cancelled' && isCancellable && (
+                                    {isCancellable && (
                                         <button 
                                             onClick={handleCancel}
                                             disabled={registering}
@@ -521,11 +567,14 @@ const EventDetailPage = () => {
                                     )}
                                 </div>
                             ) : (
+                                // BUG-017 Fix: Nếu sự kiện bị hủy, disable nút đăng ký
                                 <button 
                                     onClick={handleRegister}
-                                    disabled={registering || (new Date() > deadlineDate)}
+                                    disabled={registering || isPastDeadline || isCancelled}
                                     className={`w-full py-4 rounded-xl font-semibold text-lg transition ${
-                                        new Date() > deadlineDate
+                                        isCancelled
+                                        ? 'bg-red-100 text-red-500 cursor-not-allowed'
+                                        : isPastDeadline
                                         ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
                                         : remainingSpots <= 0 
                                           ? 'bg-[#F05A4A] text-white hover:bg-[#d84e3f]'
@@ -534,9 +583,13 @@ const EventDetailPage = () => {
                                 >
                                     {registering 
                                         ? t('event_detail.processing', 'Đang xử lý...') 
-                                        : (new Date() > deadlineDate)
+                                        : isCancelled
+                                          ? t('event_detail.event_cancelled', 'Sự kiện đã bị hủy')
+                                          : isPastDeadline
                                           ? t('event_detail.register_closed', 'Hết hạn đăng ký')
-                                          : (remainingSpots > 0 ? t('event_detail.register_now', 'Đăng ký tham gia') : t('event_detail.register_waitlist', 'Đăng ký vào hàng chờ'))
+                                          : userRegistration?.status === 'cancelled'
+                                            ? 'Đăng ký lại tham gia'
+                                            : (remainingSpots > 0 ? t('event_detail.register_now', 'Đăng ký tham gia') : t('event_detail.register_waitlist', 'Đăng ký vào hàng chờ'))
                                     }
                                 </button>
                             )}

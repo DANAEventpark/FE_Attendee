@@ -45,7 +45,11 @@ const LoginPage = () => {
       if (err.response?.data?.error_code === 'EMAIL_UNVERIFIED') {
         setIsUnverified(true);
       }
-      setError(err.response?.data?.message || t('login.failed_fallback', 'Có lỗi xảy ra khi đăng nhập.'));
+      // BUG-013 Fix: Luôn hiển thị lỗi, có fallback rõ ràng
+      const msg = err.response?.data?.message
+        || err.message
+        || 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.';
+      setError(msg);
     } finally {
       setLoading(false);
     }

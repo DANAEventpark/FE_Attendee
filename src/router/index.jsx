@@ -60,7 +60,7 @@ const router = createBrowserRouter([
       {
         // REQ_11 — Attendee Dashboard: lịch sử đăng ký
         path: '/dashboard',
-        element: <DashboardPage />
+        element: <ProtectedRoute><DashboardPage /></ProtectedRoute>
       },
       {
         path: '/profile',

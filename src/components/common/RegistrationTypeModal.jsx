@@ -1,18 +1,11 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, User, Users, AlertCircle, CheckCircle } from 'lucide-react';
+import { X, User, Users, AlertCircle, CheckCircle, Building2 } from 'lucide-react';
 
 /**
  * RegistrationTypeModal
- * Modal hỏi người dùng muốn đăng ký cá nhân hay tổ chức.
- *
- * Props:
- *  - isOpen        {boolean}  - hiển thị modal hay không
- *  - onClose       {fn}       - đóng modal
- *  - onConfirm     {fn(seats)} - callback khi xác nhận, truyền số ghế
- *  - eventCapacity {number}   - sức chứa tối đa của sự kiện
- *  - approvedSeats {number}   - số ghế đã được approved (để tính còn trống)
- *  - isSubmitting  {boolean}  - đang xử lý API
+ * BUG-009 Fix: Thêm trường "Tên tổ chức" cho đăng ký nhóm
+ * BUG-022 Fix: Nút + tăng, nút − giảm (đã đúng logic)
  */
 export default function RegistrationTypeModal({
   isOpen,
@@ -22,20 +15,33 @@ export default function RegistrationTypeModal({
   approvedSeats = 0,
   isSubmitting = false,
 }) {
-  const [type, setType] = useState(null); // null | 'individual' | 'organization'
+  const [type, setType] = useState(null);
   const [seats, setSeats] = useState(2);
+  const [orgName, setOrgName] = useState(''); // BUG-009
   const [seatError, setSeatError] = useState('');
+  const [orgNameError, setOrgNameError] = useState('');
 
-  // Số ghế còn khả dụng (capacity - approved), nhưng phải < capacity
   const maxAllowed = Math.max(1, eventCapacity - approvedSeats - 1);
   const availableSeats = eventCapacity - approvedSeats;
 
   const handleTypeSelect = (selectedType) => {
     setType(selectedType);
     setSeatError('');
+    setOrgNameError('');
     if (selectedType === 'organization') {
       setSeats(Math.min(2, maxAllowed));
     }
+  };
+
+  // BUG-022 Fix: Hàm thay đổi số ghế thuần túy — không đảo chiều
+  const handleDecrement = () => {
+    setSeats(prev => Math.max(2, (parseInt(prev) || 2) - 1));
+    setSeatError('');
+  };
+
+  const handleIncrement = () => {
+    setSeats(prev => Math.min(maxAllowed, (parseInt(prev) || 2) + 1));
+    setSeatError('');
   };
 
   const handleSeatsChange = (value) => {
@@ -52,7 +58,12 @@ export default function RegistrationTypeModal({
       return;
     }
 
-    // Validate tổ chức
+    // BUG-009 Fix: Validate tên tổ chức bắt buộc
+    if (!orgName.trim()) {
+      setOrgNameError('Vui lòng nhập tên tổ chức.');
+      return;
+    }
+
     const num = parseInt(seats, 10);
     if (isNaN(num) || num < 2) {
       setSeatError('Số lượng chỗ cho tổ chức phải ít nhất là 2.');
@@ -72,7 +83,9 @@ export default function RegistrationTypeModal({
   const handleClose = () => {
     setType(null);
     setSeats(2);
+    setOrgName('');
     setSeatError('');
+    setOrgNameError('');
     onClose();
   };
 
@@ -170,6 +183,23 @@ export default function RegistrationTypeModal({
               style={{ animation: 'modalIn 0.18s ease both' }}
             >
               <div className="bg-violet-50 border border-violet-200 rounded-xl p-4">
+                {/* BUG-009 Fix: Trường tên tổ chức bắt buộc */}
+                <label className="block text-sm font-semibold text-violet-800 mb-2">
+                  Tên tổ chức <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={orgName}
+                  onChange={(e) => { setOrgName(e.target.value); setOrgNameError(''); }}
+                  placeholder="Nhập tên tổ chức / đơn vị"
+                  className="w-full border border-violet-300 rounded-lg px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white mb-3"
+                />
+                {orgNameError && (
+                  <p className="text-xs text-red-600 flex items-center gap-1 mb-2">
+                    <AlertCircle size={12} /> {orgNameError}
+                  </p>
+                )}
+
                 <label className="block text-sm font-semibold text-violet-800 mb-2">
                   Số lượng chỗ đăng ký
                 </label>
@@ -182,11 +212,11 @@ export default function RegistrationTypeModal({
                   </span>
                 </div>
 
-                {/* Stepper input */}
+                {/* BUG-022 Fix: Nút − giảm (trái), nút + tăng (phải) */}
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={() => handleSeatsChange(Math.max(2, (parseInt(seats) || 2) - 1))}
+                    onClick={handleDecrement}
                     className="w-9 h-9 rounded-lg bg-white border border-violet-300 text-violet-700 font-bold text-lg hover:bg-violet-100 transition flex items-center justify-center select-none"
                   >
                     −
@@ -201,7 +231,7 @@ export default function RegistrationTypeModal({
                   />
                   <button
                     type="button"
-                    onClick={() => handleSeatsChange(Math.min(maxAllowed, (parseInt(seats) || 2) + 1))}
+                    onClick={handleIncrement}
                     className="w-9 h-9 rounded-lg bg-white border border-violet-300 text-violet-700 font-bold text-lg hover:bg-violet-100 transition flex items-center justify-center select-none"
                   >
                     +

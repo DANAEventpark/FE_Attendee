@@ -34,7 +34,14 @@ const ProfilePage = () => {
     e.preventDefault();
     setInfoLoading(true);
     setInfoMessage({ type: '', text: '' });
-    
+
+    // BUG-011 Fix: Validate SĐT — chỉ chấp nhận số, khoảng trắng, dấu +, và dấu gạch ngang
+    const phoneValue = infoForm.phone?.trim();
+    if (phoneValue && !/^[0-9+\-\s]{7,15}$/.test(phoneValue)) {
+      setInfoMessage({ type: 'error', text: 'Số điện thoại không hợp lệ. Vui lòng chỉ nhập số (7-15 ký tự).' });
+      setInfoLoading(false);
+      return;
+    }
     try {
       let avatarUrl = infoForm.avatar;
       
